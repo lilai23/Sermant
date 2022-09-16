@@ -4,7 +4,7 @@
 
 This document focuses on [**sermant-agentcore-core**](../../sermant-agentcore/sermant-agentcore-core), which provides important kernels for handling bytecode enhancements, unified configuration, core services, plugin management, etc.
 
-- [Version of Agentcore-core](#Version of Sermant-agentcore-core)
+- [Version of Agentcore-core](#Version-of-Sermant-agentcore-core)
 - [Directory Structure](#Directory Structure)
 - [Bytecode Enhancement](#Bytecode Enhancement)
 - [Unified Configuration System](#Unified Configuration System)
