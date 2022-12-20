@@ -16,19 +16,27 @@
 
 package com.huawei.discovery.interceptors;
 
+import com.huawei.discovery.entity.RegisterContext;
 import com.huawei.discovery.retry.InvokerContext;
 import com.huawei.discovery.service.InvokerService;
+import com.huawei.discovery.service.ReportService;
 import com.huawei.discovery.utils.HttpConstants;
 import com.huawei.discovery.utils.PlugEffectWhiteBlackUtils;
 import com.huawei.discovery.utils.RequestInterceptorUtils;
 
+import com.huaweicloud.sermant.core.common.BootArgsIndexer;
 import com.huaweicloud.sermant.core.common.LoggerFactory;
 import com.huaweicloud.sermant.core.plugin.agent.entity.ExecuteContext;
 import com.huaweicloud.sermant.core.plugin.service.PluginServiceManager;
+import com.huaweicloud.sermant.core.service.ServiceManager;
 
 import org.springframework.http.HttpMethod;
 
+import java.net.InetAddress;
 import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -55,6 +63,16 @@ public class RestTemplateInterceptor extends MarkInterceptor {
         }
         Map<String, String> hostAndPath = RequestInterceptorUtils.recoverHostAndPath(uri.getPath());
         if (!PlugEffectWhiteBlackUtils.isPlugEffect(hostAndPath.get(HttpConstants.HTTP_URI_SERVICE))) {
+            ReportService reportService = ServiceManager.getService(ReportService.class);
+            Map<String, Object> params = new HashMap<>();
+            params.put("eventType", "request");
+            params.put("role", BootArgsIndexer.getAppName());
+            params.put("serviceName", RegisterContext.INSTANCE.getServiceInstance().getServiceName());
+            params.put("ipAddress", InetAddress.getLocalHost().getHostAddress());
+            params.put("isEnhance", false);
+            params.put("description", "");
+            params.put("timeStamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            reportService.report(params);
             return context;
         }
         RequestInterceptorUtils.printRequestLog("restTemplate", hostAndPath);
@@ -106,6 +124,16 @@ public class RestTemplateInterceptor extends MarkInterceptor {
 
     @Override
     public ExecuteContext after(ExecuteContext context) throws Exception {
+        ReportService reportService = ServiceManager.getService(ReportService.class);
+        Map<String, Object> params = new HashMap<>();
+        params.put("eventType", "request");
+        params.put("role", BootArgsIndexer.getAppName());
+        params.put("serviceName", RegisterContext.INSTANCE.getServiceInstance().getServiceName());
+        params.put("ipAddress", InetAddress.getLocalHost().getHostAddress());
+        params.put("isEnhance", true);
+        params.put("description", "");
+        params.put("timeStamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        reportService.report(params);
         return context;
     }
 
