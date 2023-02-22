@@ -73,7 +73,7 @@ public interface RuleStrategy<I> {
     List<I> getZoneInstances(String serviceName, List<I> instances, String zone);
 
     /**
-     * 选取同标签的实例
+     * 根据标签的实例
      *
      * @param serviceName 服务名
      * @param instances 实例列表

@@ -60,7 +60,7 @@ public class TagRouteHandler extends AbstractRouteHandler {
         List<Rule> rules = TagRuleUtils.getTagRules(configuration, targetName, AppCache.INSTANCE.getAppName());
         List<Route> routes = getRoutes(rules);
         if (!CollectionUtils.isEmpty(routes)) {
-            return RuleStrategyHandler.INSTANCE.getMatchInstances(targetName, instances, routes);
+            return RuleStrategyHandler.INSTANCE.getTagMatchInstances(targetName, instances, routes);
         }
         return RuleStrategyHandler.INSTANCE
                 .getMismatchInstances(targetName, instances, RuleUtils.getTags(rules, false), true);

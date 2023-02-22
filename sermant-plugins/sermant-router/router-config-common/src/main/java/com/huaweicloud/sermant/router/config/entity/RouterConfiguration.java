@@ -16,10 +16,12 @@
 
 package com.huaweicloud.sermant.router.config.entity;
 
+import com.huaweicloud.sermant.router.common.constants.RouterConstant;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -30,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RouterConfiguration {
     /**
-     * 服务的标签规则,外层key为服务名，内层key为标签规则类型kind，内层value为该类型标签路由的具体规则
+     * 服务的标签规则,外层key为标签规则类型kind，内层key为服务名，内层value为该类型标签路由的具体规则
      */
     private final Map<String, Map<String, List<Rule>>> rules = new ConcurrentHashMap<>();
 
@@ -44,18 +46,23 @@ public class RouterConfiguration {
     }
 
     public void updateServiceRule(String serviceName, List<EntireRule> entireRules) {
-        Map<String, List<Rule>> serviceRules = rules.get(serviceName);
-        if (serviceRules == null) {
-            serviceRules = new ConcurrentHashMap<>();
-        }
-        serviceRules.clear();
+        Map<String, List<Rule>> flowRules = rules.get(RouterConstant.FLOW_MATCH_KIND);
+        Map<String, List<Rule>> tagRules = rules.get(RouterConstant.TAG_MATCH_KIND);
         for (EntireRule entireRule : entireRules) {
-            serviceRules.put(entireRule.getKind(), entireRule.getRules());
+            if (RouterConstant.FLOW_MATCH_KIND.equals(entireRule.getKind())) {
+                flowRules.putIfAbsent(serviceName, entireRule.getRules());
+            }
+            if (RouterConstant.TAG_MATCH_KIND.equals(entireRule.getKind())) {
+                tagRules.putIfAbsent(serviceName, entireRule.getRules());
+            }
         }
     }
 
     public void removeServiceRule(String serviceName) {
-        rules.remove(serviceName);
+        Map<String, List<Rule>> flowRules = rules.get(RouterConstant.FLOW_MATCH_KIND);
+        Map<String, List<Rule>> tagRules = rules.get(RouterConstant.TAG_MATCH_KIND);
+        flowRules.remove(serviceName);
+        tagRules.remove(serviceName);
     }
 
     /**
@@ -66,11 +73,10 @@ public class RouterConfiguration {
     public void resetRouteRule(Map<String, List<EntireRule>> map) {
         rules.clear();
         for (String serviceName : map.keySet()) {
-            Map<String, List<Rule>> serviceRules = new ConcurrentHashMap<>();
             for (EntireRule entireRule : map.get(serviceName)) {
-                serviceRules.put(entireRule.getKind(), entireRule.getRules());
+                Map<String, List<Rule>> serviceRuleMap = rules.getOrDefault(entireRule.getKind(), new ConcurrentHashMap<>());
+                serviceRuleMap.putIfAbsent(serviceName, entireRule.getRules());
             }
-            rules.put(serviceName, serviceRules);
         }
     }
 

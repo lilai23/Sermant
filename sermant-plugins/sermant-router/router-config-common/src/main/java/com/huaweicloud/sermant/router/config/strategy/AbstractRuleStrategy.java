@@ -94,7 +94,7 @@ public abstract class AbstractRuleStrategy<I> implements RuleStrategy<I> {
     }
 
     /**
-     * 选取同区域的实例
+     * 选取同标签的实例
      *
      * @param instances 实例列表
      * @param zone 区域
