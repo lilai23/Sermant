@@ -71,4 +71,14 @@ public interface RuleStrategy<I> {
      * @return 路由过滤后的实例
      */
     List<I> getZoneInstances(String serviceName, List<I> instances, String zone);
+
+    /**
+     * 选取同标签的实例
+     *
+     * @param serviceName 服务名
+     * @param instances 实例列表
+     * @param zone 区域
+     * @return 路由过滤后的实例
+     */
+    List<I> getTagMatchInstances(String serviceName, List<I> instances, String zone);
 }

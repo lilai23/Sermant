@@ -111,6 +111,18 @@ public enum RuleStrategyHandler {
         return getRuleStrategy(instances).getZoneInstances(serviceName, instances, zone);
     }
 
+    /**
+     * 选取同区域的实例
+     *
+     * @param serviceName 服务名
+     * @param instances 实例列表
+     * @param zone 区域
+     * @return 路由过滤后的实例
+     */
+    public List<Object> getTagMatchInstances(String serviceName, List<Object> instances, String zone) {
+        return getRuleStrategy(instances).getZoneInstances(serviceName, instances, zone);
+    }
+
     private AbstractRuleStrategy<Object> getRuleStrategy(List<Object> instances) {
         if (ruleStrategy == null) {
             synchronized (RuleStrategyHandler.class) {

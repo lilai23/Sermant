@@ -30,12 +30,32 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RouterConfiguration {
     /**
-     * 标签规则,key为应用名，value为规则
+     * 服务的标签规则,外层key为服务名，内层key为标签规则类型kind，内层value为该类型标签路由的具体规则
      */
-    private final Map<String, List<Rule>> routeRule = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, List<Rule>>> rules = new ConcurrentHashMap<>();
 
-    public Map<String, List<Rule>> getRouteRule() {
-        return routeRule;
+    /**
+     * 全局标签规则,key为标签规则类型kind，value为该类型标签路由的具体规则
+     */
+    private Map<String, List<Rule>> globalRules = new ConcurrentHashMap<>();
+
+    public Map<String, Map<String, List<Rule>>> getRouteRule() {
+        return rules;
+    }
+
+    public void updateServiceRule(String serviceName, List<EntireRule> entireRules) {
+        Map<String, List<Rule>> serviceRules = rules.get(serviceName);
+        if (serviceRules == null) {
+            serviceRules = new ConcurrentHashMap<>();
+        }
+        serviceRules.clear();
+        for (EntireRule entireRule : entireRules) {
+            serviceRules.put(entireRule.getKind(), entireRule.getRules());
+        }
+    }
+
+    public void removeServiceRule(String serviceName) {
+        rules.remove(serviceName);
     }
 
     /**
@@ -43,9 +63,22 @@ public class RouterConfiguration {
      *
      * @param map 路由规则
      */
-    public void resetRouteRule(Map<String, List<Rule>> map) {
-        routeRule.clear();
-        routeRule.putAll(map);
+    public void resetRouteRule(Map<String, List<EntireRule>> map) {
+        rules.clear();
+        for (String serviceName : map.keySet()) {
+            Map<String, List<Rule>> serviceRules = new ConcurrentHashMap<>();
+            for (EntireRule entireRule : map.get(serviceName)) {
+                serviceRules.put(entireRule.getKind(), entireRule.getRules());
+            }
+            rules.put(serviceName, serviceRules);
+        }
+    }
+
+    public void resetGlobalRule(List<EntireRule> list) {
+        globalRules.clear();
+        for (EntireRule entireRule : list) {
+            globalRules.put(entireRule.getKind(), entireRule.getRules());
+        }
     }
 
     /**

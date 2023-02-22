@@ -16,6 +16,10 @@
 
 package com.huaweicloud.sermant.router.common.constants;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * 常量
  *
@@ -54,6 +58,12 @@ public class RouterConstant {
     public static final String ROUTER_KEY_PREFIX = "servicecomb.routeRule";
 
     /**
+     * 标签路由全局规则key
+     */
+    public static final String GLOBAL_ROUTER_KEY = "servicecomb.globalRouteRule";
+
+
+    /**
      * dubbo路由规则缓存名
      */
     public static final String DUBBO_CACHE_NAME = "DUBBO_ROUTE";
@@ -87,6 +97,12 @@ public class RouterConstant {
      * dubbo应用注册区域的key
      */
     public static final String ZONE_KEY = "service.meta.zone";
+
+    public static final String FLOW_MATCH_KIND = "routematcher.sermant.io/flow";
+
+    public static final String TAG_MATCH_KIND = "routematcher.sermant.io/tag";
+
+    public static final List<String> KIND_LIST = Arrays.asList(FLOW_MATCH_KIND, TAG_MATCH_KIND);
 
     private RouterConstant() {
     }

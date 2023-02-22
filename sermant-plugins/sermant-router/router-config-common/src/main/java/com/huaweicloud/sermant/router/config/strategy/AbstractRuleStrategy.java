@@ -101,6 +101,21 @@ public abstract class AbstractRuleStrategy<I> implements RuleStrategy<I> {
      * @return 路由过滤后的实例
      */
     @Override
+    public List<I> getTagMatchInstances(String serviceName, List<I> instances, String zone) {
+        if (StringUtils.isBlank(zone)) {
+            return instances;
+        }
+        return getInstances(zoneInstanceStrategy, zone, serviceName, instances, true);
+    }
+
+    /**
+     * 选取同区域的实例
+     *
+     * @param instances 实例列表
+     * @param zone 区域
+     * @return 路由过滤后的实例
+     */
+    @Override
     public List<I> getZoneInstances(String serviceName, List<I> instances, String zone) {
         if (StringUtils.isBlank(zone)) {
             return instances;
