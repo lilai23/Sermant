@@ -19,16 +19,12 @@ package com.huaweicloud.sermant.router.spring.interceptor;
 import com.huaweicloud.sermant.core.plugin.agent.entity.ExecuteContext;
 import com.huaweicloud.sermant.core.plugin.agent.interceptor.AbstractInterceptor;
 import com.huaweicloud.sermant.router.common.request.RequestData;
+import com.huaweicloud.sermant.router.common.request.RequestTag;
 import com.huaweicloud.sermant.router.common.utils.ThreadLocalUtils;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.web.server.ServerWebExchange;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * spring cloud gateway LoadBalancerClientFilter增强类，获取请求数据
@@ -44,8 +40,12 @@ public class LoadBalancerClientFilterInterceptor extends AbstractInterceptor {
             ServerWebExchange exchange = (ServerWebExchange) argument;
             HttpRequest request = exchange.getRequest();
             HttpHeaders headers = request.getHeaders();
+            RequestTag requestTag = ThreadLocalUtils.getRequestTag();
+            if (requestTag != null) {
+                requestTag.getTag().forEach(headers::putIfAbsent);
+            }
             String path = request.getURI().getPath();
-            ThreadLocalUtils.setRequestData(new RequestData(getHeader(headers), path, request.getMethod().name()));
+            ThreadLocalUtils.setRequestData(new RequestData(headers, path, request.getMethod().name()));
         }
         return context;
     }
@@ -60,13 +60,5 @@ public class LoadBalancerClientFilterInterceptor extends AbstractInterceptor {
     public ExecuteContext onThrow(ExecuteContext context) {
         ThreadLocalUtils.removeRequestData();
         return context;
-    }
-
-    private Map<String, List<String>> getHeader(HttpHeaders headers) {
-        Map<String, List<String>> map = new HashMap<>();
-        for (Entry<String, List<String>> entry : headers.entrySet()) {
-            map.put(entry.getKey(), entry.getValue());
-        }
-        return map;
     }
 }

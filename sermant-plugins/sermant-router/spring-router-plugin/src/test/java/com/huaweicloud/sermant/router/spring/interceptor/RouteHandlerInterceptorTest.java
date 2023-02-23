@@ -18,7 +18,7 @@ package com.huaweicloud.sermant.router.spring.interceptor;
 
 import com.huaweicloud.sermant.core.service.ServiceManager;
 import com.huaweicloud.sermant.router.common.request.RequestData;
-import com.huaweicloud.sermant.router.common.request.RequestHeader;
+import com.huaweicloud.sermant.router.common.request.RequestTag;
 import com.huaweicloud.sermant.router.common.utils.ThreadLocalUtils;
 import com.huaweicloud.sermant.router.spring.service.SpringConfigService;
 
@@ -68,6 +68,14 @@ public class RouteHandlerInterceptorTest {
                     keys.add("foo");
                     return keys;
                 }
+
+                @Override
+                public Set<String> getMatchTags() {
+                    Set<String> keys = new HashSet<>();
+                    keys.add("bar");
+                    keys.add("foo");
+                    return keys;
+                }
             });
     }
 
@@ -88,7 +96,7 @@ public class RouteHandlerInterceptorTest {
      */
     @Before
     public void clear() {
-        ThreadLocalUtils.removeRequestHeader();
+        ThreadLocalUtils.removeRequestTag();
         ThreadLocalUtils.removeRequestData();
     }
 
@@ -106,8 +114,8 @@ public class RouteHandlerInterceptorTest {
 
         // 测试preHandle方法
         interceptor.preHandle(request, response, obj);
-        RequestHeader requestHeader = ThreadLocalUtils.getRequestHeader();
-        Map<String, List<String>> header = requestHeader.getHeader();
+        RequestTag requestTag = ThreadLocalUtils.getRequestTag();
+        Map<String, List<String>> header = requestTag.getTag();
         Assert.assertNotNull(header);
         Assert.assertEquals(2, header.size());
         Assert.assertEquals("bar1", header.get("bar").get(0));
@@ -123,6 +131,6 @@ public class RouteHandlerInterceptorTest {
 
         // 测试afterCompletion,验证是否释放线程变量
         interceptor.afterCompletion(new MockHttpServletRequest(), new MockHttpServletResponse(), new Object(), null);
-        Assert.assertNull(ThreadLocalUtils.getRequestHeader());
+        Assert.assertNull(ThreadLocalUtils.getRequestTag());
     }
 }

@@ -49,6 +49,11 @@ public class TestSpringConfigService implements SpringConfigService {
         return Collections.emptySet();
     }
 
+    @Override
+    public Set<String> getMatchTags() {
+        return Collections.emptySet();
+    }
+
     public String getCacheName() {
         return cacheName;
     }

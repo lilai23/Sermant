@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-2022 Huawei Technologies Co., Ltd. All rights reserved.
+ * Copyright (C) 2023-2023 Huawei Technologies Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,32 +14,27 @@
  * limitations under the License.
  */
 
-package com.huaweicloud.sermant.router.common.request;
+package com.huaweicloud.sermant.router.spring.handler;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
- * 请求
+ * web拦截器处理器
  *
  * @author provenceee
- * @since 2022-07-12
+ * @since 2023-02-21
  */
-public class RequestHeader {
-    private final Map<String, List<String>> header;
-
+public abstract class AbstractInterceptorHandler extends AbstractHandler {
     /**
-     * 构造方法
+     * 获取透传的标记
      *
-     * @param header 请求头/attachment
+     * @param path 请求路径
+     * @param methodName http方法
+     * @param headers http请求头
+     * @param parameters url参数
+     * @return 透传的标记
      */
-    public RequestHeader(Map<String, List<String>> header) {
-        this.header = header;
-    }
-
-    public Map<String, List<String>> getHeader() {
-        return Optional.ofNullable(header).orElse(Collections.emptyMap());
-    }
+    public abstract Map<String, List<String>> getRequestTag(String path, String methodName,
+        Map<String, List<String>> headers, Map<String, String[]> parameters);
 }
