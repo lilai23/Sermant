@@ -21,7 +21,6 @@ import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -39,12 +38,22 @@ public class RouterConfiguration {
     /**
      * 全局标签规则,key为标签规则类型kind，value为该类型标签路由的具体规则
      */
-    private Map<String, List<Rule>> globalRules = new ConcurrentHashMap<>();
+    private final Map<String, List<Rule>> globalRules = new ConcurrentHashMap<>();
 
     public Map<String, Map<String, List<Rule>>> getRouteRule() {
         return rules;
     }
 
+    public Map<String, List<Rule>> getGlobalRule() {
+        return globalRules;
+    }
+
+    /**
+     * 更新服务粒度的路由规则
+     *
+     * @param serviceName 服务名
+     * @param entireRules 配置中心下发的路由规则列表
+     */
     public void updateServiceRule(String serviceName, List<EntireRule> entireRules) {
         Map<String, List<Rule>> flowRules = rules.get(RouterConstant.FLOW_MATCH_KIND);
         Map<String, List<Rule>> tagRules = rules.get(RouterConstant.TAG_MATCH_KIND);
@@ -58,6 +67,11 @@ public class RouterConfiguration {
         }
     }
 
+    /**
+     * 移除服务的路由规则
+     *
+     * @param serviceName 服务名
+     */
     public void removeServiceRule(String serviceName) {
         Map<String, List<Rule>> flowRules = rules.get(RouterConstant.FLOW_MATCH_KIND);
         Map<String, List<Rule>> tagRules = rules.get(RouterConstant.TAG_MATCH_KIND);
@@ -74,12 +88,19 @@ public class RouterConfiguration {
         rules.clear();
         for (String serviceName : map.keySet()) {
             for (EntireRule entireRule : map.get(serviceName)) {
-                Map<String, List<Rule>> serviceRuleMap = rules.getOrDefault(entireRule.getKind(), new ConcurrentHashMap<>());
+                Map<String, List<Rule>> serviceRuleMap = rules.getOrDefault(entireRule.getKind(),
+                        new ConcurrentHashMap<>());
                 serviceRuleMap.putIfAbsent(serviceName, entireRule.getRules());
+                rules.put(entireRule.getKind(), serviceRuleMap);
             }
         }
     }
 
+    /**
+     * 重置全局路由规则
+     *
+     * @param list 路由规则
+     */
     public void resetGlobalRule(List<EntireRule> list) {
         globalRules.clear();
         for (EntireRule entireRule : list) {

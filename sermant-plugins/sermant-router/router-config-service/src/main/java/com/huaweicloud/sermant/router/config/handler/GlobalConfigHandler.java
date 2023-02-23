@@ -1,7 +1,21 @@
+/*
+ * Copyright (C) 2023-2023 Huawei Technologies Co., Ltd. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.huaweicloud.sermant.router.config.handler;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.huaweicloud.sermant.core.service.dynamicconfig.common.DynamicConfigEvent;
 import com.huaweicloud.sermant.core.service.dynamicconfig.common.DynamicConfigEventType;
 import com.huaweicloud.sermant.core.utils.StringUtils;
@@ -10,13 +24,17 @@ import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 import com.huaweicloud.sermant.router.config.cache.ConfigCache;
 import com.huaweicloud.sermant.router.config.entity.EntireRule;
 import com.huaweicloud.sermant.router.config.entity.RouterConfiguration;
+import com.huaweicloud.sermant.router.config.utils.RuleUtils;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 路由配置处理器(全局纬度)
+ * 路由配置处理器(全局维度)
  *
  * @author lilai
  * @since 2023-02-18
@@ -28,11 +46,11 @@ public class GlobalConfigHandler extends AbstractConfigHandler {
         RouterConfiguration configuration = ConfigCache.getLabel(cacheName);
         if (event.getEventType() == DynamicConfigEventType.DELETE) {
             configuration.resetGlobalRule(Collections.emptyList());
-//            RuleUtils.initMatchKeys(configuration);
+            RuleUtils.initGlobalKeys(configuration);
             return;
         }
         List<EntireRule> list = JSONArray.parseArray(JSONObject.toJSONString(getRule(event)), EntireRule.class);
-//        RuleUtils.removeInvalidRules(list);
+        RuleUtils.removeInvalidRules(list);
         if (CollectionUtils.isEmpty(list)) {
             configuration.resetGlobalRule(Collections.emptyList());
         } else {
@@ -41,7 +59,7 @@ public class GlobalConfigHandler extends AbstractConfigHandler {
             }
             configuration.resetGlobalRule(list);
         }
-//        RuleUtils.updateMatchKeys(serviceName, list);
+        RuleUtils.initGlobalKeys(configuration);
     }
 
     @Override

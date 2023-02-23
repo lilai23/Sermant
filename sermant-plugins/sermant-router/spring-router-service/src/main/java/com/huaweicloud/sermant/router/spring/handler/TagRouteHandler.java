@@ -1,8 +1,25 @@
+/*
+ * Copyright (C) 2023-2023 Huawei Technologies Co., Ltd. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.huaweicloud.sermant.router.spring.handler;
 
 import com.huaweicloud.sermant.core.plugin.config.PluginConfigManager;
 import com.huaweicloud.sermant.router.common.config.RouterConfig;
 import com.huaweicloud.sermant.router.common.constants.RouterConstant;
+import com.huaweicloud.sermant.router.common.request.RequestData;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 import com.huaweicloud.sermant.router.config.cache.ConfigCache;
 import com.huaweicloud.sermant.router.config.entity.Match;
@@ -22,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 类描述
+ * tag匹配方式的路由处理器
  *
  * @author lilai
  * @since 2023-02-21
@@ -30,26 +47,26 @@ import java.util.Map;
 public class TagRouteHandler extends AbstractRouteHandler {
     private final RouterConfig routerConfig;
 
+    /**
+     * 构造方法
+     */
     public TagRouteHandler() {
         routerConfig = PluginConfigManager.getConfig(RouterConfig.class);
     }
 
     @Override
-    public List<Object> handle(String targetName, List<Object> instances, String path,
-                               Map<String, List<String>> header) {
-        // todo tag筛选实例
-//        EnabledStrategy strategy = ConfigCache.getEnabledStrategy(RouterConstant.SPRING_CACHE_NAME);
-//        if (shouldHandle(instances) && enabledZoneRouter && strategy.getStrategy()
-//                .isMatch(strategy.getValue(), targetName)) {
-//            return RuleStrategyHandler.INSTANCE.getZoneInstances(targetName, instances, routerConfig.getZone());
-//        }
+    public List<Object> handle(String targetName, List<Object> instances, RequestData requestData) {
+        if (!shouldHandle(instances)) {
+            return instances;
+        }
 
-        return super.handle(targetName, instances, path, header);
+        List<Object> result = getTargetInstancesByRules(targetName, instances);
+        return super.handle(targetName, result, requestData);
     }
 
     @Override
     public int getOrder() {
-        return 2;
+        return RouterConstant.TAG_HANDLER_ORDER;
     }
 
     private List<Object> getTargetInstancesByRules(String targetName, List<Object> instances) {
@@ -60,7 +77,7 @@ public class TagRouteHandler extends AbstractRouteHandler {
         List<Rule> rules = TagRuleUtils.getTagRules(configuration, targetName, AppCache.INSTANCE.getAppName());
         List<Route> routes = getRoutes(rules);
         if (!CollectionUtils.isEmpty(routes)) {
-            return RuleStrategyHandler.INSTANCE.getTagMatchInstances(targetName, instances, routes);
+            return RuleStrategyHandler.INSTANCE.getMatchInstances(targetName, instances, routes);
         }
         return RuleStrategyHandler.INSTANCE
                 .getMismatchInstances(targetName, instances, RuleUtils.getTags(rules, false), true);

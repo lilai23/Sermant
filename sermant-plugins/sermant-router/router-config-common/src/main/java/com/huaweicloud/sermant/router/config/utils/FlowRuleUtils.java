@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2023-2023 Huawei Technologies Co., Ltd. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.huaweicloud.sermant.router.config.utils;
 
 import com.huaweicloud.sermant.core.utils.StringUtils;
@@ -11,11 +27,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * 类描述
+ * 流量匹配方式的路由工具类
  *
  * @author lilai
  * @since 2023-02-21
@@ -35,15 +51,21 @@ public class FlowRuleUtils extends RuleUtils {
         if (RouterConfiguration.isInValid(configuration)) {
             return Collections.emptyList();
         }
-        Map<String, Map<String, List<Rule>>> routeRule = configuration.getRouteRule();
-        if (CollectionUtils.isEmpty(routeRule)) {
-            return Collections.emptyList();
+
+        List<Rule> rules = Optional.ofNullable(
+                        Optional.ofNullable(
+                                        Optional.ofNullable(configuration.getRouteRule())
+                                                .orElseGet(Collections::emptyMap)
+                                                .get(RouterConstant.FLOW_MATCH_KIND))
+                                .orElseGet(Collections::emptyMap)
+                                .get(targetService))
+                .orElseGet(Collections::emptyList);
+        if (CollectionUtils.isEmpty(rules)) {
+            rules = Optional.ofNullable(
+                    Optional.ofNullable(configuration.getGlobalRule()).orElseGet(Collections::emptyMap)
+                            .get(RouterConstant.FLOW_MATCH_KIND)).orElseGet(Collections::emptyList);
         }
-        Map<String, List<Rule>> ruleMap = routeRule.get(targetService);
-        if (CollectionUtils.isEmpty(ruleMap)) {
-            return Collections.emptyList();
-        }
-        List<Rule> rules = ruleMap.get(RouterConstant.FLOW_MATCH_KIND);
+
         if (CollectionUtils.isEmpty(rules)) {
             return Collections.emptyList();
         }
@@ -57,6 +79,14 @@ public class FlowRuleUtils extends RuleUtils {
         return list;
     }
 
+    /**
+     * 获取目标规则
+     *
+     * @param rule        路由规则
+     * @param path        dubbo接口名/url路径
+     * @param serviceName 本服务服务名
+     * @return 是否是目标规则
+     */
     private static boolean isTargetFlowRule(Rule rule, String path, String serviceName) {
         if (rule == null) {
             return false;

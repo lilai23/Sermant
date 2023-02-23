@@ -57,10 +57,9 @@ public class RouterConfigHandler extends AbstractConfigHandler {
                 continue;
             }
             List<EntireRule> list = JSONArray.parseArray(JSONObject.toJSONString(routeRuleList), EntireRule.class);
-            // todo Rule
             RuleUtils.removeInvalidRules(list);
             if (!CollectionUtils.isEmpty(list)) {
-                for(EntireRule rule: list) {
+                for (EntireRule rule : list) {
                     rule.getRules().sort((o1, o2) -> o2.getPrecedence() - o1.getPrecedence());
                 }
                 routeRule.put(entry.getKey(), list);

@@ -17,7 +17,9 @@
 package com.huaweicloud.sermant.router.config.utils;
 
 import com.huaweicloud.sermant.core.common.LoggerFactory;
+import com.huaweicloud.sermant.core.plugin.config.PluginConfigManager;
 import com.huaweicloud.sermant.core.utils.StringUtils;
+import com.huaweicloud.sermant.router.common.config.RouterConfig;
 import com.huaweicloud.sermant.router.common.constants.RouterConstant;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 import com.huaweicloud.sermant.router.config.entity.EntireRule;
@@ -28,7 +30,6 @@ import com.huaweicloud.sermant.router.config.entity.RouterConfiguration;
 import com.huaweicloud.sermant.router.config.entity.Rule;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,7 +43,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * 路由工具类
@@ -55,11 +55,16 @@ public class RuleUtils {
 
     private static final Set<String> MATCH_KEYS = new CopyOnWriteArraySet<>();
 
+    private static final Set<String> GLOBAL_MATCH_KEYS = new CopyOnWriteArraySet<>();
+
     private static final Map<String, Set<String>> SERVICE_MATCH_KEYS = new ConcurrentHashMap<>();
 
     private static final int ONO_HUNDRED = 100;
 
+    private static final RouterConfig routerConfig = PluginConfigManager.getConfig(RouterConfig.class);
+
     public RuleUtils() {
+
     }
 
     /**
@@ -92,27 +97,51 @@ public class RuleUtils {
         if (RouterConfiguration.isInValid(configuration)) {
             return;
         }
-        Map<String, List<Rule>> routeRules = configuration.getRouteRule();
+        Map<String, List<Rule>> routeRules = configuration.getRouteRule().get(RouterConstant.FLOW_MATCH_KIND);
         for (List<Rule> rules : routeRules.values()) {
             addKeys(rules, MATCH_KEYS);
         }
     }
 
     /**
+     * 更新全局的header key
+     *
+     * @param configuration 路由配置
+     */
+    public static void initGlobalKeys(RouterConfiguration configuration) {
+        GLOBAL_MATCH_KEYS.clear();
+        if (RouterConfiguration.isInValid(configuration)) {
+            return;
+        }
+        List<Rule> rules = configuration.getGlobalRule().get(RouterConstant.FLOW_MATCH_KIND);
+        addKeys(rules, GLOBAL_MATCH_KEYS);
+    }
+
+    /**
      * 更新header key
      *
      * @param serviceName 服务名
-     * @param rules       路由规则
+     * @param entireRules 整体路由规则
      */
-    public static void updateMatchKeys(String serviceName, List<EntireRule> rules) {
-        if (CollectionUtils.isEmpty(rules)) {
+    public static void updateMatchKeys(String serviceName, List<EntireRule> entireRules) {
+        if (CollectionUtils.isEmpty(entireRules)) {
             SERVICE_MATCH_KEYS.remove(serviceName);
             return;
         }
         Set<String> keys = SERVICE_MATCH_KEYS.computeIfAbsent(serviceName, value -> new CopyOnWriteArraySet<>());
         keys.clear();
-        // todo
-//        addKeys(rules, keys);
+        List<Rule> rules = new ArrayList<>();
+        for (EntireRule entireRule : entireRules) {
+            if (RouterConstant.FLOW_MATCH_KIND.equals(entireRule.getKind())) {
+                rules = entireRule.getRules();
+                break;
+            }
+        }
+        if (CollectionUtils.isEmpty(rules)) {
+            SERVICE_MATCH_KEYS.remove(serviceName);
+            return;
+        }
+        addKeys(rules, keys);
     }
 
     /**
@@ -122,6 +151,7 @@ public class RuleUtils {
      */
     public static Set<String> getMatchKeys() {
         Set<String> keys = new HashSet<>(MATCH_KEYS);
+        keys.addAll(GLOBAL_MATCH_KEYS);
         for (Set<String> value : SERVICE_MATCH_KEYS.values()) {
             keys.addAll(value);
         }
@@ -168,7 +198,7 @@ public class RuleUtils {
             EntireRule entireRule = entireIterator.next();
 
             // 去掉kind配置不正确的规则
-            if (entireRule.getKind() == null || !RouterConstant.KIND_LIST.contains(entireRule.getKind())) {
+            if (entireRule.getKind() == null || !RouterConstant.MATCH_KIND_LIST.contains(entireRule.getKind())) {
                 entireIterator.remove();
                 continue;
             }
@@ -185,7 +215,7 @@ public class RuleUtils {
                     continue;
                 }
 
-                // 去掉无效的路由
+                // 去掉无效的路由和修复同标签规则的路由
                 removeInvalidRoute(routes);
 
                 if (RouterConstant.FLOW_MATCH_KIND.equals(entireRule.getKind())) {
@@ -245,7 +275,7 @@ public class RuleUtils {
     }
 
     /**
-     * 去掉无效的路由
+     * 去掉无效的路由和修复同标签规则的路由
      *
      * @param routeList 路由
      */
@@ -276,7 +306,23 @@ public class RuleUtils {
     }
 
     private static boolean isInvalidRoute(Route route) {
-        return route == null || CollectionUtils.isEmpty(route.getTags());
+        if (route == null || CollectionUtils.isEmpty(route.getTags())) {
+            return true;
+        }
+
+        // 修正配置为保留字段CONSUMER_TAG的规则
+        Map<String, String> tags = route.getTags();
+        if (route.getWeight() == null) {
+            for (String key : tags.keySet()) {
+                if (!RouterConstant.CONSUMER_TAG.equals(tags.get(key))) {
+                    return true;
+                }
+                tags.put(key, routerConfig.getParameters().get(key));
+            }
+            route.setWeight(100);
+            return false;
+        }
+        return false;
     }
 
     private static void addKeys(List<Rule> rules, Set<String> keys) {

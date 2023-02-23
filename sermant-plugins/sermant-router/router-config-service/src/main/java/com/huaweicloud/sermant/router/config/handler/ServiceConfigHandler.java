@@ -51,12 +51,13 @@ public class ServiceConfigHandler extends AbstractConfigHandler {
             RuleUtils.updateMatchKeys(serviceName, Collections.emptyList());
             return;
         }
-        List<EntireRule> list = JSONArray.parseArray(JSONObject.toJSONString(getRule(event, serviceName)), EntireRule.class);
+        List<EntireRule> list = JSONArray.parseArray(JSONObject.toJSONString(getRule(event, serviceName)),
+                EntireRule.class);
         RuleUtils.removeInvalidRules(list);
         if (CollectionUtils.isEmpty(list)) {
-            configuration.getRouteRule().remove(serviceName);
+            configuration.removeServiceRule(serviceName);
         } else {
-            for(EntireRule rule: list) {
+            for (EntireRule rule : list) {
                 rule.getRules().sort((o1, o2) -> o2.getPrecedence() - o1.getPrecedence());
             }
             configuration.updateServiceRule(serviceName, list);

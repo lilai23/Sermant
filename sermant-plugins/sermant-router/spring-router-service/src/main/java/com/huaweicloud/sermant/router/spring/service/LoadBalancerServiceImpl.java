@@ -17,23 +17,14 @@
 package com.huaweicloud.sermant.router.spring.service;
 
 import com.huaweicloud.sermant.core.plugin.config.PluginConfigManager;
-import com.huaweicloud.sermant.core.utils.StringUtils;
 import com.huaweicloud.sermant.router.common.config.RouterConfig;
 import com.huaweicloud.sermant.router.common.constants.RouterConstant;
-import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
+import com.huaweicloud.sermant.router.common.request.RequestData;
 import com.huaweicloud.sermant.router.config.cache.ConfigCache;
 import com.huaweicloud.sermant.router.config.entity.EnabledStrategy;
-import com.huaweicloud.sermant.router.config.entity.Route;
-import com.huaweicloud.sermant.router.config.entity.RouterConfiguration;
-import com.huaweicloud.sermant.router.config.entity.Rule;
-import com.huaweicloud.sermant.router.config.utils.FlowRuleUtils;
-import com.huaweicloud.sermant.router.config.utils.RuleUtils;
-import com.huaweicloud.sermant.router.spring.cache.AppCache;
 import com.huaweicloud.sermant.router.spring.handler.HandlerChainEntry;
 import com.huaweicloud.sermant.router.spring.strategy.RuleStrategyHandler;
-import com.huaweicloud.sermant.router.spring.utils.RouteUtils;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +43,6 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     // 用于过滤实例的tags集合，value为null，代表含有该标签的实例全部过滤，不判断value值
     private final Map<String, String> allMismatchTags;
 
-    public List<Object> getInstance(String targetName, List<Object> instances, String path,
-                                    Map<String, List<String>> header) {
-        return HandlerChainEntry.INSTANCE.process(targetName, instances, path, header);
-    }
-
     /**
      * 构造方法
      */
@@ -72,9 +58,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     }
 
     @Override
-    public List<Object> getTargetInstances(String targetName, List<Object> instances, String path,
-                                           Map<String, List<String>> header) {
-        return instances;
+    public List<Object> getTargetInstances(String targetName, List<Object> instances, RequestData requestData) {
+        return HandlerChainEntry.INSTANCE.process(targetName, instances, requestData);
     }
 
     @Override
