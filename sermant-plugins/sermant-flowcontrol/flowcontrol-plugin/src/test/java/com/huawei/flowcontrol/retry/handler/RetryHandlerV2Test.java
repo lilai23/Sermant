@@ -17,14 +17,24 @@
 
 package com.huawei.flowcontrol.retry.handler;
 
-import com.huawei.flowcontrol.BaseTest;
+import com.huawei.flowcontrol.common.config.FlowControlConfig;
 import com.huawei.flowcontrol.common.core.rule.RetryRule;
 import com.huawei.flowcontrol.common.handler.retry.RetryContext;
 import com.huawei.flowcontrol.retry.cluster.AlibabaDubboClusterInvoker.AlibabaDubboRetry;
 
+import com.huaweicloud.sermant.core.operation.OperationManager;
+import com.huaweicloud.sermant.core.operation.converter.api.YamlConverter;
+import com.huaweicloud.sermant.core.plugin.config.PluginConfigManager;
+import com.huaweicloud.sermant.implement.operation.converter.YamlConverterImpl;
+
 import io.github.resilience4j.retry.Retry;
+
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 /**
  * 重试处理器测试
@@ -32,7 +42,27 @@ import org.junit.Test;
  * @author zhouss
  * @since 2022-03-03
  */
-public class RetryHandlerV2Test extends BaseTest {
+public class RetryHandlerV2Test {
+    private MockedStatic<PluginConfigManager> pluginConfigManagerMockedStatic;
+
+    private MockedStatic<OperationManager> operationManagerMockedStatic;
+
+    @Before
+    public void setUp() {
+        pluginConfigManagerMockedStatic = Mockito
+                .mockStatic(PluginConfigManager.class);
+        pluginConfigManagerMockedStatic.when(() -> PluginConfigManager.getPluginConfig(FlowControlConfig.class))
+                .thenReturn(new FlowControlConfig());
+        operationManagerMockedStatic = Mockito.mockStatic(OperationManager.class);
+        operationManagerMockedStatic.when(() -> OperationManager.getOperation(YamlConverter.class)).thenReturn(new YamlConverterImpl());
+    }
+
+    @After
+    public void tearDown() {
+        pluginConfigManagerMockedStatic.close();
+        operationManagerMockedStatic.close();
+    }
+
     /**
      * 测试流程
      */

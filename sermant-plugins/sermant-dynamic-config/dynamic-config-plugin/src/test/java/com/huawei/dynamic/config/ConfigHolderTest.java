@@ -21,14 +21,20 @@ import com.huawei.dynamic.config.sources.TestConfigSources;
 import com.huawei.dynamic.config.sources.TestLowestConfigSources;
 
 import com.huaweicloud.sermant.core.common.LoggerFactory;
+import com.huaweicloud.sermant.core.operation.OperationManager;
+import com.huaweicloud.sermant.core.operation.converter.api.YamlConverter;
 import com.huaweicloud.sermant.core.plugin.config.PluginConfigManager;
 import com.huaweicloud.sermant.core.service.dynamicconfig.common.DynamicConfigEvent;
+import com.huaweicloud.sermant.implement.operation.converter.YamlConverterImpl;
 
+import org.junit.After;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -49,22 +55,43 @@ public class ConfigHolderTest {
 
     private static DynamicConfigEvent event;
 
-    @BeforeClass
-    public static void before() {
+    private MockedStatic<PluginConfigManager> pluginConfigManagerMockedStatic;
+
+    private MockedStatic<OperationManager> operationManagerMockedStatic;
+
+    @Before
+    public void setUp() {
+        operationManagerMockedStatic = Mockito.mockStatic(OperationManager.class);
+        operationManagerMockedStatic.when(() -> OperationManager.getOperation(YamlConverter.class)).thenReturn(new YamlConverterImpl());
         event = Mockito.mock(DynamicConfigEvent.class);
         DynamicConfiguration configuration = Mockito.mock(DynamicConfiguration.class);
         Mockito.when(event.getKey()).thenReturn(KEY);
         Mockito.when(event.getContent()).thenReturn(CONTENT);
         Mockito.when(configuration.getFirstRefreshDelayMs()).thenReturn(0L);
-        Mockito.mockStatic(PluginConfigManager.class)
-            .when(() -> PluginConfigManager.getPluginConfig(DynamicConfiguration.class))
-            .thenReturn(configuration);
+        pluginConfigManagerMockedStatic = Mockito.mockStatic(PluginConfigManager.class);
+        pluginConfigManagerMockedStatic.when(() -> PluginConfigManager.getPluginConfig(DynamicConfiguration.class))
+                .thenReturn(configuration);
+        ConfigHolder.INSTANCE.getConfigSources().removeIf(configSource -> configSource.getClass() == TestConfigSources.class
+                || configSource.getClass() == TestLowestConfigSources.class);
+        ConfigHolder.INSTANCE.getConfigSources().add(new TestConfigSources());
+        ConfigHolder.INSTANCE.getConfigSources().add(new TestLowestConfigSources());
+        Collections.sort(ConfigHolder.INSTANCE.getConfigSources());
+    }
+
+    @After
+    public void tearDown() {
+        pluginConfigManagerMockedStatic.close();
+        operationManagerMockedStatic.close();
+        ConfigHolder.INSTANCE.getConfigSources().removeIf(configSource -> configSource.getClass() == TestConfigSources.class
+                        || configSource.getClass() == TestLowestConfigSources.class);
     }
 
     @Test
-    public void testResolveAndListener() {
+    public void testResolveAndListener() throws InterruptedException {
         ConfigHolder.INSTANCE.addListener(event -> LOGGER.info("refresh success"));
         ConfigHolder.INSTANCE.resolve(event);
+        // 由于此处为异步执行, 因此这里等待异步执行完成
+        Thread.sleep(1000);
         final int test = (Integer) ConfigHolder.INSTANCE.getConfig(KEY);
         Assert.assertEquals(TestConfigSources.ORDER, test);
         final Set<String> configNames = ConfigHolder.INSTANCE.getConfigNames();

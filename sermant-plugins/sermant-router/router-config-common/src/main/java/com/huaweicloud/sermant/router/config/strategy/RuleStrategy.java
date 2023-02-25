@@ -16,7 +16,7 @@
 
 package com.huaweicloud.sermant.router.config.strategy;
 
-import com.huaweicloud.sermant.router.config.label.entity.Route;
+import com.huaweicloud.sermant.router.config.entity.Route;
 
 import java.util.List;
 import java.util.Map;
@@ -24,26 +24,51 @@ import java.util.Map;
 /**
  * 路由策略
  *
- * @param <T> 泛型
+ * @param <I> 实例泛型
  * @author provenceee
  * @since 2021-10-14
  */
-public interface RuleStrategy<T> {
+public interface RuleStrategy<I> {
     /**
      * 选取路由的实例
      *
-     * @param routes 路由规则
+     * @param serviceName 服务名
      * @param instances 实例列表
+     * @param routes 路由规则
+     * @param isReplaceDash 是否需要替换破折号为点号（dubbo需要）
      * @return 路由过滤后的实例
      */
-    List<T> getTargetInstances(List<Route> routes, List<T> instances);
+    List<I> getMatchInstances(String serviceName, List<I> instances, List<Route> routes, boolean isReplaceDash);
+
+    /**
+     * 根据请求信息选取路由的实例
+     *
+     * @param serviceName 服务名
+     * @param instances 实例列表
+     * @param tags 请求信息
+     * @return 路由过滤后的实例
+     */
+    List<I> getMatchInstancesByRequest(String serviceName, List<I> instances, Map<String, String> tags);
 
     /**
      * 选取不匹配标签的实例
      *
-     * @param tags 标签
+     * @param serviceName 服务名
      * @param instances 实例列表
+     * @param tags 标签
+     * @param isReturnAllInstancesWhenMismatch 无匹配时，是否返回全部实例
      * @return 路由过滤后的实例
      */
-    List<T> getMismatchInstances(List<Map<String, String>> tags, List<T> instances);
+    List<I> getMismatchInstances(String serviceName, List<I> instances, List<Map<String, String>> tags,
+        boolean isReturnAllInstancesWhenMismatch);
+
+    /**
+     * 选取同区域的实例
+     *
+     * @param serviceName 服务名
+     * @param instances 实例列表
+     * @param zone 区域
+     * @return 路由过滤后的实例
+     */
+    List<I> getZoneInstances(String serviceName, List<I> instances, String zone);
 }

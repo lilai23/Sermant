@@ -28,8 +28,7 @@ import com.huaweicloud.sermant.core.plugin.agent.matcher.MethodMatcher;
  * @since 2022-04-13
  */
 public class RegistryConfigDeclarer extends AbstractDeclarer {
-    private static final String[] ENHANCE_CLASS = {"org.apache.dubbo.config.RegistryConfig",
-        "com.alibaba.dubbo.config.RegistryConfig"};
+    private static final String[] ENHANCE_CLASS = {"org.apache.dubbo.config.RegistryConfig"};
 
     private static final String INTERCEPT_CLASS = "com.huawei.dubbo.registry.interceptor.RegistryConfigInterceptor";
 

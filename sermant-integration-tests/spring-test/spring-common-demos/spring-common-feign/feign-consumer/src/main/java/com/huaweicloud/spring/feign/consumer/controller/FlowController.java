@@ -18,7 +18,7 @@
 package com.huaweicloud.spring.feign.consumer.controller;
 
 import com.huaweicloud.spring.common.flowcontrol.YamlSourceFactory;
-import com.huaweicloud.spring.feign.api.FlowControlService;
+import com.huaweicloud.spring.feign.api.FeignService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class FlowController {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowController.class);
 
     @Autowired
-    private FlowControlService flowControlService;
+    private FeignService feignService;
 
     /**
      * 实例隔离接口测试
@@ -55,7 +55,7 @@ public class FlowController {
     @RequestMapping("instanceIsolation")
     public String instanceIsolation() {
         try {
-            return flowControlService.instanceIsolation();
+            return feignService.instanceIsolation();
         } catch (Exception ex) {
             return convertMsg(ex);
         }
@@ -70,7 +70,7 @@ public class FlowController {
     public int retry() {
         String tryCount = null;
         try {
-            tryCount = flowControlService.retry(UUID.randomUUID().toString());
+            tryCount = feignService.retry(UUID.randomUUID().toString());
         } catch (Exception ex) {
             LOGGER.error("Retry {} times", tryCount);
             LOGGER.error(ex.getMessage(), ex);
@@ -85,7 +85,37 @@ public class FlowController {
      */
     @RequestMapping("rateLimiting")
     public String rateLimiting() {
-        return flowControlService.rateLimiting();
+        return feignService.rateLimiting();
+    }
+
+    /**
+     * 限流测试
+     *
+     * @return ok
+     */
+    @RequestMapping("prefixRateLimiting")
+    public String rateLimitingPrefix() {
+        return rateLimiting();
+    }
+
+    /**
+     * 限流测试
+     *
+     * @return ok
+     */
+    @RequestMapping("rateLimitingContains")
+    public String rateLimitingContains() {
+        return rateLimiting();
+    }
+
+    /**
+     * 限流测试
+     *
+     * @return ok
+     */
+    @RequestMapping("rateLimitingSuffix")
+    public String rateLimitingSuffix() {
+        return rateLimiting();
     }
 
     /**
@@ -96,7 +126,7 @@ public class FlowController {
     @RequestMapping("timedBreaker")
     public String timedBreaker() {
         try {
-            return flowControlService.timedBreaker();
+            return feignService.timedBreaker();
         } catch (Exception ex) {
             return convertMsg(ex);
         }
@@ -110,7 +140,7 @@ public class FlowController {
     @RequestMapping("exceptionBreaker")
     public String exceptionBreaker() {
         try {
-            return flowControlService.exceptionBreaker();
+            return feignService.exceptionBreaker();
         } catch (Exception ex) {
             return convertMsg(ex);
         }
@@ -123,7 +153,7 @@ public class FlowController {
      */
     @RequestMapping("bulkhead")
     public String bulkhead() {
-        return flowControlService.bulkhead();
+        return feignService.bulkhead();
     }
 
     /**
@@ -134,7 +164,77 @@ public class FlowController {
     @RequestMapping("header")
     public String header() {
         try {
-            return flowControlService.header();
+            return feignService.headerExact();
+        } catch (Exception ex) {
+            return convertMsg(ex);
+        }
+    }
+
+    /**
+     * 请求头匹配测试
+     *
+     * @return ok
+     */
+    @RequestMapping("headerPrefix")
+    public String headerPrefix() {
+        try {
+            return feignService.headerPrefix();
+        } catch (Exception ex) {
+            return convertMsg(ex);
+        }
+    }
+
+    /**
+     * 请求头匹配测试
+     *
+     * @return ok
+     */
+    @RequestMapping("headerSuffix")
+    public String headerSuffix() {
+        try {
+            return feignService.headerSuffix();
+        } catch (Exception ex) {
+            return convertMsg(ex);
+        }
+    }
+
+    /**
+     * 请求头匹配测试
+     *
+     * @return ok
+     */
+    @RequestMapping("headerContains")
+    public String headerContains() {
+        try {
+            return feignService.headerContains();
+        } catch (Exception ex) {
+            return convertMsg(ex);
+        }
+    }
+
+    /**
+     * 请求头匹配测试
+     *
+     * @return ok
+     */
+    @RequestMapping("headerCompareMatch")
+    public String headerCompareMatch() {
+        try {
+            return feignService.headerCompareMatch();
+        } catch (Exception ex) {
+            return convertMsg(ex);
+        }
+    }
+
+    /**
+     * 请求头匹配测试
+     *
+     * @return ok
+     */
+    @RequestMapping("headerCompareNotMatch")
+    public String headerCompareNotMatch() {
+        try {
+            return feignService.headerCompareNotMatch();
         } catch (Exception ex) {
             return convertMsg(ex);
         }
@@ -148,7 +248,7 @@ public class FlowController {
     @RequestMapping("serviceNameMatch")
     public String serviceNameMatch() {
         try {
-            return flowControlService.serviceNameMatch();
+            return feignService.serviceNameMatch();
         } catch (Exception ex) {
             return convertMsg(ex);
         }
@@ -161,7 +261,7 @@ public class FlowController {
      */
     @RequestMapping("serviceNameNoMatch")
     public String serviceNameNoMatch() {
-        return flowControlService.serviceNameNoMatch();
+        return feignService.serviceNameNoMatch();
     }
 
     /**
@@ -171,7 +271,7 @@ public class FlowController {
      */
     @RequestMapping("faultNull")
     public String faultNull() {
-        return flowControlService.faultNull();
+        return feignService.faultNull();
     }
 
     /**
@@ -182,7 +282,7 @@ public class FlowController {
     @RequestMapping("faultThrow")
     public String faultThrow() {
         try {
-            flowControlService.faultThrow();
+            feignService.faultThrow();
         } catch (Exception ex) {
             return convertMsg(ex);
         }
@@ -196,7 +296,7 @@ public class FlowController {
      */
     @RequestMapping("faultDelay")
     public String faultDelay() {
-        return flowControlService.faultDelay();
+        return feignService.faultDelay();
     }
 
     private String convertMsg(Exception ex) {

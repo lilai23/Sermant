@@ -18,14 +18,14 @@ package com.huaweicloud.sermant.router.spring.interceptor;
 
 import com.huaweicloud.sermant.core.plugin.agent.entity.ExecuteContext;
 import com.huaweicloud.sermant.core.plugin.agent.interceptor.AbstractInterceptor;
+import com.huaweicloud.sermant.core.plugin.config.PluginConfigManager;
 import com.huaweicloud.sermant.core.service.ServiceManager;
-import com.huaweicloud.sermant.router.common.constants.RouterConstant;
+import com.huaweicloud.sermant.router.common.config.RouterConfig;
+import com.huaweicloud.sermant.router.common.request.RequestData;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 import com.huaweicloud.sermant.router.common.utils.ReflectUtils;
-import com.huaweicloud.sermant.router.spring.cache.RequestData;
+import com.huaweicloud.sermant.router.common.utils.ThreadLocalUtils;
 import com.huaweicloud.sermant.router.spring.service.LoadBalancerService;
-import com.huaweicloud.sermant.router.spring.service.SpringConfigService;
-import com.huaweicloud.sermant.router.spring.utils.ThreadLocalUtils;
 
 import com.netflix.loadbalancer.BaseLoadBalancer;
 import com.netflix.zuul.context.RequestContext;
@@ -47,27 +47,23 @@ import javax.servlet.http.HttpServletRequest;
  * @since 2022-07-12
  */
 public class BaseLoadBalancerInterceptor extends AbstractInterceptor {
-    private final SpringConfigService configService;
-
     private final LoadBalancerService loadBalancerService;
+
+    private final RouterConfig routerConfig;
+
+    private final boolean canLoadZuul;
 
     /**
      * 构造方法
      */
     public BaseLoadBalancerInterceptor() {
-        configService = ServiceManager.getService(SpringConfigService.class);
         loadBalancerService = ServiceManager.getService(LoadBalancerService.class);
+        routerConfig = PluginConfigManager.getPluginConfig(RouterConfig.class);
+        canLoadZuul = canLoadZuul();
     }
 
     @Override
     public ExecuteContext before(ExecuteContext context) {
-        if (configService.isInValid(RouterConstant.SPRING_CACHE_NAME)) {
-            return context;
-        }
-        RequestData requestData = getRequestData().orElse(null);
-        if (requestData == null) {
-            return context;
-        }
         Object object = context.getObject();
         if (object instanceof BaseLoadBalancer) {
             List<Object> serverList = getServerList(context.getMethod().getName(), object);
@@ -76,8 +72,15 @@ public class BaseLoadBalancerInterceptor extends AbstractInterceptor {
             }
             BaseLoadBalancer loadBalancer = (BaseLoadBalancer) object;
             String name = loadBalancer.getName();
-            context.skip(Collections.unmodifiableList(loadBalancerService.getTargetInstances(name, serverList,
-                requestData.getPath(), requestData.getHeader())));
+            RequestData requestData = getRequestData().orElse(null);
+            if (requestData == null) {
+                return context.skip(Collections.unmodifiableList(loadBalancerService
+                    .getZoneInstances(name, serverList, routerConfig.isEnabledSpringZoneRouter())));
+            }
+            List<Object> targetInstances = loadBalancerService
+                .getTargetInstances(name, serverList, requestData.getPath(), requestData.getHeader());
+            context.skip(Collections.unmodifiableList(
+                loadBalancerService.getZoneInstances(name, targetInstances, routerConfig.isEnabledSpringZoneRouter())));
         }
         return context;
     }
@@ -98,11 +101,11 @@ public class BaseLoadBalancerInterceptor extends AbstractInterceptor {
         if (requestData != null) {
             return Optional.of(requestData);
         }
-        if (!canLoadZuul()) {
+        if (!canLoadZuul) {
             return Optional.empty();
         }
         RequestContext context = RequestContext.getCurrentContext();
-        if (context == null) {
+        if (context == null || context.getRequest() == null) {
             return Optional.empty();
         }
         Map<String, List<String>> header = new HashMap<>();

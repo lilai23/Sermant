@@ -23,8 +23,6 @@ import com.huaweicloud.sermant.core.plugin.config.PluginConfig;
 import com.huaweicloud.sermant.core.plugin.config.ServiceMeta;
 import com.huaweicloud.sermant.core.utils.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -38,11 +36,6 @@ import java.util.Map;
  */
 @ConfigTypeKey(value = "servicecomb.service")
 public class RegisterConfig implements PluginConfig {
-    /**
-     * sc注册中心地址 多个地址使用逗号隔开
-     */
-    private String address = "http://127.0.0.1:30100";
-
     /**
      * kie命名空间
      */
@@ -77,11 +70,6 @@ public class RegisterConfig implements PluginConfig {
      * 默认sc版本
      */
     private String version = "1.0.0";
-
-    /**
-     * 注册中心类型
-     */
-    private RegisterType registerType = RegisterType.SERVICE_COMB;
 
     /**
      * 是否开启sc的加密 作为配置类，使用布尔类型不可使用is开头，否则存在配置无法读取的问题
@@ -261,14 +249,6 @@ public class RegisterConfig implements PluginConfig {
         this.sslEnabled = sslEnabled;
     }
 
-    public RegisterType getRegisterType() {
-        return registerType;
-    }
-
-    public void setRegisterType(RegisterType registerType) {
-        this.registerType = registerType;
-    }
-
     public String getVersion() {
         return version;
     }
@@ -283,26 +263,6 @@ public class RegisterConfig implements PluginConfig {
 
     public void setProject(String project) {
         this.project = project;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    /**
-     * 获取逗号分隔后的地址列表
-     *
-     * @return 地址列表
-     */
-    public List<String> getAddressList() {
-        if (StringUtils.isBlank(address)) {
-            return Collections.emptyList();
-        }
-        return new ArrayList<>(Arrays.asList(address.split(",")));
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     public int getHeartbeatInterval() {

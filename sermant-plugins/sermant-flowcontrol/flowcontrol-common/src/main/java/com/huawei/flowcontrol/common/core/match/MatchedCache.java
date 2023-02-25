@@ -17,18 +17,20 @@
 
 package com.huawei.flowcontrol.common.core.match;
 
-import com.huawei.flowcontrol.common.core.ResolverManager;
-import com.huawei.flowcontrol.common.core.resolver.AbstractResolver;
-import com.huawei.flowcontrol.common.core.resolver.listener.ConfigUpdateListener;
 import com.huawei.flowcontrol.common.cache.Cache;
 import com.huawei.flowcontrol.common.cache.TimedConcurrentMapCache;
 import com.huawei.flowcontrol.common.config.CommonConst;
 import com.huawei.flowcontrol.common.config.FlowControlConfig;
+import com.huawei.flowcontrol.common.core.ResolverManager;
+import com.huawei.flowcontrol.common.core.resolver.AbstractResolver;
+import com.huawei.flowcontrol.common.core.resolver.listener.ConfigUpdateListener;
 import com.huawei.flowcontrol.common.entity.RequestEntity;
 
 import com.huaweicloud.sermant.core.plugin.config.PluginConfigManager;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -101,10 +103,18 @@ public class MatchedCache {
         }
 
         private void updateAllBusinessCache(Map<RequestEntity, Set<String>> curCache) {
+            final List<RequestEntity> needRemoveEntity = new ArrayList<>();
             for (Entry<RequestEntity, Set<String>> entry : curCache.entrySet()) {
                 final RequestEntity requestEntity = entry.getKey();
-                cache.put(requestEntity, MatchManager.INSTANCE.match(requestEntity, null));
+                final Set<String> match = MatchManager.INSTANCE.match(requestEntity, null);
+                if (!match.isEmpty()) {
+                    cache.put(requestEntity, match);
+                } else {
+                    needRemoveEntity.add(entry.getKey());
+                }
             }
+            needRemoveEntity.forEach(requestEntity -> cache.evict(requestEntity));
+            needRemoveEntity.clear();
         }
     }
 }

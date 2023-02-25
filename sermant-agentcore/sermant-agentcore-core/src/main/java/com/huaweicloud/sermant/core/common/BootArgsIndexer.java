@@ -17,12 +17,13 @@
 package com.huaweicloud.sermant.core.common;
 
 import com.huaweicloud.sermant.core.exception.SchemaException;
+import com.huaweicloud.sermant.core.utils.FileUtils;
 import com.huaweicloud.sermant.core.utils.JarFileUtils;
-import com.huaweicloud.sermant.core.utils.UuidUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
 
@@ -45,6 +46,11 @@ public class BootArgsIndexer {
     private static final String CORE_VERSION;
 
     /**
+     * 核心功能实现包所在目录
+     */
+    private static File implementDir;
+
+    /**
      * 配置文件
      */
     private static File configFile;
@@ -55,6 +61,11 @@ public class BootArgsIndexer {
     private static File pluginSettingFile;
 
     /**
+     * 日志配置
+     */
+    private static File logSettingFile;
+
+    /**
      * pluginPackage插件包
      */
     private static File pluginPackageDir;
@@ -63,13 +74,17 @@ public class BootArgsIndexer {
 
     private static String appType;
 
-    private static long instanceId;
+    private static String instanceId;
 
     private BootArgsIndexer() {
     }
 
     public static String getCoreVersion() {
         return CORE_VERSION;
+    }
+
+    public static File getImplementDir() {
+        return implementDir;
     }
 
     public static File getConfigFile() {
@@ -84,6 +99,10 @@ public class BootArgsIndexer {
         return pluginPackageDir;
     }
 
+    public static File getLogSettingFile() {
+        return logSettingFile;
+    }
+
     public static String getAppName() {
         return appName;
     }
@@ -92,7 +111,7 @@ public class BootArgsIndexer {
         return appType;
     }
 
-    public static long getInstanceId() {
+    public static String getInstanceId() {
         return instanceId;
     }
 
@@ -102,15 +121,26 @@ public class BootArgsIndexer {
      * @param argsMap 启动参数
      */
     public static void build(Map<String, Object> argsMap) {
-        configFile = new File(argsMap.get(CommonConstant.CORE_CONFIG_FILE_KEY).toString());
+        implementDir = new File(FileUtils.validatePath(argsMap.get(CommonConstant.CORE_IMPLEMENT_DIR_KEY).toString()));
+        if (!implementDir.exists() || !implementDir.isDirectory()) {
+            LOGGER.warning("Implement directory not found! ");
+        }
+        configFile = new File(FileUtils.validatePath(argsMap.get(CommonConstant.CORE_CONFIG_FILE_KEY).toString()));
         if (!configFile.exists() || !configFile.isFile()) {
             LOGGER.warning("Config file is not found! ");
         }
-        pluginSettingFile = new File(argsMap.get(CommonConstant.PLUGIN_SETTING_FILE_KEY).toString());
+        pluginSettingFile = new File(FileUtils.validatePath(argsMap.get(CommonConstant.PLUGIN_SETTING_FILE_KEY)
+                .toString()));
         if (!pluginSettingFile.exists() || !pluginSettingFile.isFile()) {
             LOGGER.warning("Plugin setting file is not found! ");
         }
-        pluginPackageDir = new File(argsMap.get(CommonConstant.PLUGIN_PACKAGE_DIR_KEY).toString());
+        logSettingFile = new File(FileUtils.validatePath(argsMap.get(CommonConstant.LOG_SETTING_FILE_KEY)
+                .toString()));
+        if (!logSettingFile.exists() || !logSettingFile.isFile()) {
+            LOGGER.warning("Log setting file is not found! Using default log setting file in resources.");
+        }
+        pluginPackageDir = new File(FileUtils.validatePath(argsMap.get(CommonConstant.PLUGIN_PACKAGE_DIR_KEY)
+                .toString()));
         if (!pluginPackageDir.exists() || !pluginPackageDir.isDirectory()) {
             LOGGER.warning("Plugin package directory is not found! ");
         }
@@ -120,7 +150,7 @@ public class BootArgsIndexer {
         Object object = argsMap.get(CommonConstant.APP_TYPE_KEY);
         appType = object == null ? "0" : object.toString();
 
-        instanceId = UuidUtil.getId();
+        instanceId = UUID.randomUUID().toString();
     }
 
     static {

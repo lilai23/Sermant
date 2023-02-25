@@ -18,6 +18,7 @@ package com.huaweicloud.integration.service;
 
 import org.apache.dubbo.config.RegistryConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * 测试接口
@@ -28,6 +29,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class FooServiceImpl implements FooService {
     @Autowired
     private RegistryConfig registryConfig;
+
+    @Value("${service_meta_zone:${SERVICE_META_ZONE:${service.meta.zone:bar}}}")
+    private String zone;
+
+    @Value("${service_meta_version:${SERVICE_META_VERSION:${service.meta.version:1.0.0}}}")
+    private String version;
+
+    @Value("${dubbo.application.name}")
+    private String name;
+
+    @Value("${service_meta_parameters:${SERVICE_META_PARAMETERS:${service.meta.parameters:}}}")
+    private String parameters;
 
     @Override
     public String foo(String str) {
@@ -42,5 +55,14 @@ public class FooServiceImpl implements FooService {
     @Override
     public String getRegistryProtocol() {
         return registryConfig.getProtocol();
+    }
+
+    @Override
+    public String getMetadata(boolean exit) {
+        if (exit) {
+            System.exit(0);
+        }
+        return "I'm " + name + ", my version is " + version + ", my zone is " + zone + ", my parameters is ["
+            + parameters + "].";
     }
 }

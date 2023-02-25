@@ -146,8 +146,9 @@ public class ReflectUtilsTest {
     public void testAlibabaExtensionLoader() {
         ExtensionLoader<RegistryFactory> loader = ExtensionLoader.getExtensionLoader(RegistryFactory.class);
 
-        // 初始化
+        // 初始化, 其他UT可能已经加载，先移除ServiceCenterRegistryFactory
         Map<String, Class<?>> cachedClasses = ReflectUtils.getExtensionClasses(loader);
+        cachedClasses.remove("sc", ServiceCenterRegistryFactory.class);
         Assert.assertEquals(0, cachedClasses.size());
 
         // 加载ServiceCenterRegistryFactory
@@ -281,8 +282,9 @@ public class ReflectUtilsTest {
             org.apache.dubbo.common.extension.ExtensionLoader
                 .getExtensionLoader(org.apache.dubbo.registry.RegistryFactory.class);
 
-        // 初始化
+        // 初始化, 其他UT可能已经加载，先移除ServiceCenterRegistryFactory
         Map<String, Class<?>> cachedClasses = ReflectUtils.getExtensionClasses(loader);
+        cachedClasses.remove("sc", com.huawei.dubbo.registry.apache.ServiceCenterRegistryFactory.class);
         Assert.assertEquals(1, cachedClasses.size());
 
         // 加载ServiceCenterRegistryFactory
@@ -317,6 +319,11 @@ public class ReflectUtilsTest {
         Assert.assertEquals(2, ReflectUtils.getParameters(url).size());
         Assert.assertEquals("bar", ReflectUtils.getParameters(url).get("group"));
         Assert.assertEquals("0.0.1", ReflectUtils.getParameters(url).get("version"));
+        Assert.assertEquals("localhost", ReflectUtils.getHost(url));
+        Assert.assertEquals(8080, ReflectUtils.getPort(url));
+        Assert.assertEquals("bar", ReflectUtils.getParameter(url, "group"));
+        url = ReflectUtils.addParameters(url, Collections.singletonMap("interface", "interface"));
+        Assert.assertEquals("interface", ReflectUtils.getServiceInterface(url));
 
         // 测试setHost方法
         url = ReflectUtils.setHost(url, "localhost1");
@@ -324,7 +331,7 @@ public class ReflectUtilsTest {
         Assert.assertEquals(DUBBO_PROTOCOL, ReflectUtils.getProtocol(url));
         Assert.assertEquals("localhost1:8080", ReflectUtils.getAddress(url));
         Assert.assertEquals("com.huawei.foo.BarTest", ReflectUtils.getPath(url));
-        Assert.assertEquals(2, ReflectUtils.getParameters(url).size());
+        Assert.assertEquals(3, ReflectUtils.getParameters(url).size());
         Assert.assertEquals("bar", ReflectUtils.getParameters(url).get("group"));
         Assert.assertEquals("0.0.1", ReflectUtils.getParameters(url).get("version"));
 
@@ -334,7 +341,7 @@ public class ReflectUtilsTest {
         Assert.assertEquals(DUBBO_PROTOCOL, ReflectUtils.getProtocol(url));
         Assert.assertEquals("localhost2:8081", ReflectUtils.getAddress(url));
         Assert.assertEquals("com.huawei.foo.BarTest", ReflectUtils.getPath(url));
-        Assert.assertEquals(2, ReflectUtils.getParameters(url).size());
+        Assert.assertEquals(3, ReflectUtils.getParameters(url).size());
         Assert.assertEquals("bar", ReflectUtils.getParameters(url).get("group"));
         Assert.assertEquals("0.0.1", ReflectUtils.getParameters(url).get("version"));
 
@@ -344,7 +351,7 @@ public class ReflectUtilsTest {
         Assert.assertEquals(DUBBO_PROTOCOL, ReflectUtils.getProtocol(url));
         Assert.assertEquals("localhost2:8081", ReflectUtils.getAddress(url));
         Assert.assertEquals("com.huawei.foo.FooTest", ReflectUtils.getPath(url));
-        Assert.assertEquals(2, ReflectUtils.getParameters(url).size());
+        Assert.assertEquals(3, ReflectUtils.getParameters(url).size());
         Assert.assertEquals("bar", ReflectUtils.getParameters(url).get("group"));
         Assert.assertEquals("0.0.1", ReflectUtils.getParameters(url).get("version"));
 
@@ -354,7 +361,7 @@ public class ReflectUtilsTest {
         Assert.assertEquals(DUBBO_PROTOCOL, ReflectUtils.getProtocol(url));
         Assert.assertEquals("localhost2:8081", ReflectUtils.getAddress(url));
         Assert.assertEquals("com.huawei.foo.FooTest", ReflectUtils.getPath(url));
-        Assert.assertEquals(1, ReflectUtils.getParameters(url).size());
+        Assert.assertEquals(2, ReflectUtils.getParameters(url).size());
         Assert.assertNull(ReflectUtils.getParameters(url).get("group"));
         Assert.assertEquals("0.0.1", ReflectUtils.getParameters(url).get("version"));
 
@@ -364,7 +371,7 @@ public class ReflectUtilsTest {
         Assert.assertEquals(DUBBO_PROTOCOL, ReflectUtils.getProtocol(url));
         Assert.assertEquals("localhost2:8081", ReflectUtils.getAddress(url));
         Assert.assertEquals("com.huawei.foo.FooTest", ReflectUtils.getPath(url));
-        Assert.assertEquals(2, ReflectUtils.getParameters(url).size());
+        Assert.assertEquals(3, ReflectUtils.getParameters(url).size());
         Assert.assertEquals("foo", ReflectUtils.getParameters(url).get("group"));
         Assert.assertEquals("0.0.1", ReflectUtils.getParameters(url).get("version"));
     }

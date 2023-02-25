@@ -16,7 +16,7 @@
 
 package com.huaweicloud.sermant.router.config.strategy.match;
 
-import com.huaweicloud.sermant.router.config.label.entity.MatchStrategy;
+import com.huaweicloud.sermant.router.config.entity.MatchStrategy;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -57,6 +57,8 @@ public class MatchStrategyTest {
 
     private List<String> regexValues;
 
+    private List<String> invalidRegexValues;
+
     private List<String> emptyList;
 
     private List<String> nullValueList;
@@ -82,6 +84,8 @@ public class MatchStrategyTest {
         intValues.add("10");
         regexValues = new ArrayList<>();
         regexValues.add("^bar.*");
+        invalidRegexValues = new ArrayList<>();
+        invalidRegexValues.add("*");
         emptyList = Collections.emptyList();
         nullValueList = Collections.singletonList(null);
     }
@@ -144,6 +148,9 @@ public class MatchStrategyTest {
 
         // 测试null arg
         Assert.assertFalse(regex.isMatch(regexValues, null, true));
+
+        // 测试无效正则
+        Assert.assertFalse(regex.isMatch(invalidRegexValues, "a", false));
 
         // 测试null values
         Assert.assertFalse(regex.isMatch(null, "BaR", false));

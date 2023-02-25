@@ -64,6 +64,18 @@
                 <module>spring-common-resttemplate</module>
             </modules>
         </profile>
+        <profile>
+            <id>zuul</id>
+            <modules>
+                <module>spring-common-zuul</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>gateway</id>
+            <modules>
+                <module>spring-common-gateway</module>
+            </modules>
+        </profile>
     </profiles>
 
     <dependencies>
@@ -78,6 +90,10 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
     </dependencies>
 </project>

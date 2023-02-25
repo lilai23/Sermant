@@ -18,8 +18,8 @@
 package com.huawei.flowcontrol.common.config;
 
 import com.huawei.flowcontrol.common.enums.FlowFramework;
-import com.huawei.flowcontrol.common.enums.MetricSendWay;
 
+import com.huaweicloud.sermant.core.config.common.ConfigFieldKey;
 import com.huaweicloud.sermant.core.config.common.ConfigTypeKey;
 import com.huaweicloud.sermant.core.plugin.config.PluginConfig;
 
@@ -177,11 +177,6 @@ public class FlowControlConfig implements PluginConfig {
     private boolean needThrowBizException = false;
 
     /**
-     * 指标数据发送方式 默认Netty
-     */
-    private MetricSendWay sendWay = MetricSendWay.NETTY;
-
-    /**
      * 等待指标数据写入文件的等待时间 单位MS
      */
     private long metricSleepTimeMs = CommonConst.DEFAULT_METRIC_SEND_INTERVAL_MS;
@@ -202,7 +197,7 @@ public class FlowControlConfig implements PluginConfig {
     private String[] alibabaDubboRetryExceptions = {"com.alibaba.dubbo.rpc.RpcException"};
 
     /**
-     * 针对alibaba dubbo重试异常
+     * 针对spring默认重试异常
      */
     private String[] springRetryExceptions = {"org.springframework.web.client.HttpServerErrorException"};
 
@@ -275,6 +270,39 @@ public class FlowControlConfig implements PluginConfig {
      * rest template-请求协议, 默认okHttp， 若宿主没有则使用Connection模式
      */
     private String restTemplateRequestFactory = "okHttp";
+
+    /**
+     * 是否替换原生的ClusterInvoker, 只针对dubbo应用;
+     * <p>若为true, 则在调用时, 调用逻辑依然会走原dubbo cluster invoker逻辑, 重试仅最外层包装</p>
+     * <p>若为false, 则在调用时, 则直接其cluster invoker替换为由插件重试的自定义重试Invoker, 默认为false</p>
+     */
+    private boolean useOriginInvoker = false;
+
+    /**
+     * 监控启动开关
+     */
+    @ConfigFieldKey("enable-start-monitor")
+    private boolean enableStartMonitor;
+
+    /**
+     * 系统自适应流控开关
+     */
+    @ConfigFieldKey("enable-system-adaptive")
+    private boolean enableSystemAdaptive;
+
+    /**
+     * 系统规则流控开关
+     */
+    @ConfigFieldKey("enable-system-rule")
+    private boolean enableSystemRule;
+
+    public boolean isUseOriginInvoker() {
+        return useOriginInvoker;
+    }
+
+    public void setUseOriginInvoker(boolean useOriginInvoker) {
+        this.useOriginInvoker = useOriginInvoker;
+    }
 
     public String getRestTemplateRequestFactory() {
         return restTemplateRequestFactory;
@@ -434,14 +462,6 @@ public class FlowControlConfig implements PluginConfig {
 
     public void setMetricSleepTimeMs(long metricSleepTimeMs) {
         this.metricSleepTimeMs = metricSleepTimeMs;
-    }
-
-    public MetricSendWay getSendWay() {
-        return sendWay;
-    }
-
-    public void setSendWay(MetricSendWay sendWay) {
-        this.sendWay = sendWay;
     }
 
     public boolean isAdaptPass() {
@@ -666,5 +686,29 @@ public class FlowControlConfig implements PluginConfig {
 
     public void setConfigKieAddress(String configKieAddress) {
         this.configKieAddress = configKieAddress;
+    }
+
+    public boolean isEnableStartMonitor() {
+        return enableStartMonitor;
+    }
+
+    public void setEnableStartMonitor(boolean enableStartMonitor) {
+        this.enableStartMonitor = enableStartMonitor;
+    }
+
+    public void setEnableSystemAdaptive(boolean isSystemAdaptive) {
+        this.enableSystemAdaptive = isSystemAdaptive;
+    }
+
+    public boolean isEnableSystemAdaptive() {
+        return enableSystemAdaptive;
+    }
+
+    public void setEnableSystemRule(boolean isSystemRule) {
+        this.enableSystemRule = isSystemRule;
+    }
+
+    public boolean isEnableSystemRule() {
+        return enableSystemRule;
     }
 }

@@ -16,7 +16,7 @@
 
 package com.huaweicloud.sermant.router.dubbo.strategy;
 
-import com.huaweicloud.sermant.router.config.label.entity.Route;
+import com.huaweicloud.sermant.router.config.entity.Route;
 import com.huaweicloud.sermant.router.config.strategy.RuleStrategy;
 import com.huaweicloud.sermant.router.dubbo.strategy.rule.InvokerRuleStrategy;
 
@@ -42,24 +42,53 @@ public enum RuleStrategyHandler {
     }
 
     /**
-     * 选取灰度应用的invokers
+     * 选取标签应用的invokers
      *
-     * @param routes 路由规则
+     * @param serviceName 服务名
      * @param invokers dubbo invokers
-     * @return 灰度应用的invokers
+     * @param routes 路由规则
+     * @return 标签应用的invokers
      */
-    public List<Object> getTargetInvoker(List<Route> routes, List<Object> invokers) {
-        return ruleStrategy.getTargetInstances(routes, invokers);
+    public List<Object> getMatchInvokers(String serviceName, List<Object> invokers, List<Route> routes) {
+        return ruleStrategy.getMatchInstances(serviceName, invokers, routes, true);
+    }
+
+    /**
+     * 选取路由匹配的实例
+     *
+     * @param serviceName 服务名
+     * @param instances 实例列表
+     * @param tags 标签
+     * @return 路由匹配的实例
+     */
+    public List<Object> getMatchInvokersByRequest(String serviceName, List<Object> instances,
+        Map<String, String> tags) {
+        return ruleStrategy.getMatchInstancesByRequest(serviceName, instances, tags);
     }
 
     /**
      * 选取不匹配标签的实例
      *
-     * @param tags 标签
+     * @param serviceName 服务名
      * @param invokers 实例列表
+     * @param tags 标签
+     * @param isReturnAllInstancesWhenMismatch 无匹配时，是否返回全部实例
      * @return 路由过滤后的实例
      */
-    public List<Object> getMissMatchInstances(List<Map<String, String>> tags, List<Object> invokers) {
-        return ruleStrategy.getMismatchInstances(tags, invokers);
+    public List<Object> getMismatchInvokers(String serviceName, List<Object> invokers, List<Map<String, String>> tags,
+        boolean isReturnAllInstancesWhenMismatch) {
+        return ruleStrategy.getMismatchInstances(serviceName, invokers, tags, isReturnAllInstancesWhenMismatch);
+    }
+
+    /**
+     * 选取同区域的实例
+     *
+     * @param serviceName 服务名
+     * @param invokers 实例列表
+     * @param zone 区域
+     * @return 路由过滤后的实例
+     */
+    public List<Object> getZoneInvokers(String serviceName, List<Object> invokers, String zone) {
+        return ruleStrategy.getZoneInstances(serviceName, invokers, zone);
     }
 }

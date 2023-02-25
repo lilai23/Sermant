@@ -17,8 +17,15 @@
 
 package com.huawei.flowcontrol.retry;
 
+import com.huawei.flowcontrol.common.config.FlowControlConfig;
+import com.huawei.flowcontrol.common.entity.FlowControlResult;
+import com.huawei.flowcontrol.common.entity.RequestEntity;
+import com.huawei.flowcontrol.service.rest4j.HttpRest4jService;
+
 import com.huaweicloud.sermant.core.plugin.agent.entity.ExecuteContext;
 import com.huaweicloud.sermant.core.plugin.agent.interceptor.Interceptor;
+import com.huaweicloud.sermant.core.plugin.config.PluginConfigManager;
+import com.huaweicloud.sermant.core.service.ServiceManager;
 
 import feign.Client;
 import feign.Request;
@@ -27,9 +34,12 @@ import feign.Request.Options;
 import feign.Response;
 
 import org.apache.http.HttpStatus;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -46,6 +56,17 @@ public class FeignRequestInterceptorTest {
 
     private Interceptor interceptor;
 
+    private MockedStatic<PluginConfigManager> pluginConfigManagerMockedStatic;
+
+    private MockedStatic<ServiceManager> serviceManagerMockedStatic;
+
+    @After
+    public void tearDown() {
+        pluginConfigManagerMockedStatic.close();
+        serviceManagerMockedStatic.close();
+    }
+
+
     /**
      * 前置初始化
      *
@@ -53,6 +74,13 @@ public class FeignRequestInterceptorTest {
      */
     @Before
     public void before() throws Exception {
+        pluginConfigManagerMockedStatic = Mockito
+                .mockStatic(PluginConfigManager.class);
+        pluginConfigManagerMockedStatic.when(() -> PluginConfigManager.getPluginConfig(FlowControlConfig.class))
+                .thenReturn(new FlowControlConfig());
+        serviceManagerMockedStatic = Mockito.mockStatic(ServiceManager.class);
+        serviceManagerMockedStatic.when(() -> ServiceManager.getService(HttpRest4jService.class))
+                .thenReturn(createRestService());
         interceptor = new FeignRequestInterceptor();
         final Client proxy = (request, options) -> createResponse();
         final Object[] allArguments = new Object[2];
@@ -88,5 +116,25 @@ public class FeignRequestInterceptorTest {
     private Request createRequest() {
         return Request.create(HttpMethod.GET, "localhost:8080", new HashMap<>(), "test".getBytes(
             StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+    }
+
+    private HttpRest4jService createRestService() {
+        return new HttpRest4jService() {
+            @Override
+            public void onBefore(String sourceName, RequestEntity requestEntity,
+                    FlowControlResult fixedResult) {
+
+            }
+
+            @Override
+            public void onAfter(String sourceName, Object result) {
+
+            }
+
+            @Override
+            public void onThrow(String sourceName, Throwable throwable) {
+
+            }
+        };
     }
 }

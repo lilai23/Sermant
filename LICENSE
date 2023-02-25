@@ -350,6 +350,20 @@ Alibaba Sentinel project is published at https://github.com/alibaba/Sentinel and
 
 ====================================================================================
 
+The following files contain a portion of Alibaba spring-cloud-alibaba project.
+
+com/huawei/registry/service/client/NacosClient.java in this product is copied from com/alibaba/cloud/nacos/registry/NacosServiceRegistry.java Alibaba spring-cloud-alibaba project.
+
+com/huawei/registry/service/cache/ServiceCache.java in this product is copied from com/alibaba/cloud/nacos/discovery/ServiceCache.java Alibaba spring-cloud-alibaba project.
+
+com/huawei/registry/service/client/NacosServiceDiscovery.java in this product is copied from com/alibaba/cloud/nacos/discovery/NacosServiceDiscovery.java Alibaba spring-cloud-alibaba project.
+
+com/huawei/registry/service/register/NacosServiceManager.java in this product is copied from com/alibaba/cloud/nacos/NacosServiceManager.java Alibaba spring-cloud-alibaba project.
+
+Alibaba spring-cloud-alibaba project is published at https://github.com/alibaba/spring-cloud-alibaba and its license is Apache License Version 2.0.
+
+====================================================================================
+
 The following files contain a portion of Apache ServiceComb Java Chassis project.
 
 com/huawei/flowcontrol/adapte/cse/entity/CseMatchRequest.java in this product is copied from org/apache/servicecomb/governance/marker/GovernanceRequest.java of Apache ServiceComb Java Chassis project.
@@ -407,6 +421,20 @@ com/huawei/registry/grace/interceptors/SpringZuulResponseInterceptor.java in thi
 com/huawei/registry/grace/interceptors/SpringLoadbalancerFeignResponseInterceptor.java in this product is copied from on org/apache/dubbo/rpc/protocol/dubbo/DubboInvoker.java of Apache Dubbo project
 
 com/huawei/registry/grace/interceptors/SpringLoadbalancerRestTemplateResponseInterceptor.java in this product is copied from on org/apache/dubbo/rpc/protocol/dubbo/DubboInvoker.java of Apache Dubbo project
+
+com/huawei/dubbo/registry/utils/NacosInstanceManageUtil.java in this product is copied from on org/apache/dubbo/registry/nacos/util/NacosInstanceManageUtil.java of Apache Dubbo project
+
+com/huawei/dubbo/registry/utils/NamingServiceUtils.java in this product is copied from on org/apache/dubbo/registry/nacos/util/NacosNamingServiceUtils.java of Apache Dubbo project
+
+com/huawei/dubbo/registry/listener/NacosAggregateListener.java in this product is copied from on org/apache/dubbo/registry/nacos/NacosAggregateListener.java of Apache Dubbo project
+
+com/huawei/dubbo/registry/entity/NacosServiceName.java in this product is copied from on org/apache/dubbo/registry/nacos/NacosServiceName.java of Apache Dubbo project
+
+com/huawei/dubbo/registry/service/NacosServiceNotify.java in this product is copied from on org/apache/dubbo/registry/support/AbstractRegistry.java of Apache Dubbo project
+
+com/huawei/dubbo/registry/service/RegistryNotifier.java in this product is copied from on org/apache/dubbo/registry/RegistryNotifier.java of Apache Dubbo project
+
+com/huawei/dubbo/registry/service/NacosRegistryServiceImpl.java in this product is copied from on org/apache/dubbo/registry/nacos/NacosRegistry.java of Apache Dubbo project
 
 Apache Dubbo project is published at https://github.com/apache/dubbo and its license is Apache License Version 2.0.
 

@@ -24,7 +24,7 @@ import com.huaweicloud.sermant.core.plugin.agent.matcher.ClassMatcher;
 import com.huaweicloud.sermant.core.plugin.agent.matcher.MethodMatcher;
 
 /**
- * nacos健康检测增强
+ * nacos健康检测增强  NamingProxy 1.x版本, NamingHttpClientProxy 2.x版本
  *
  * @author zhouss
  * @since 2021-12-17
@@ -33,7 +33,10 @@ public class NacosHealthDeclarer extends AbstractDoubleRegistryDeclarer {
     /**
      * nacos心跳发送类
      */
-    private static final String ENHANCE_CLASS = "com.alibaba.nacos.client.naming.net.NamingProxy";
+    private static final String[] ENHANCE_CLASSES = new String[] {
+        "com.alibaba.nacos.client.naming.net.NamingProxy",
+        "com.alibaba.nacos.client.naming.remote.http.NamingHttpClientProxy"
+    };
 
     /**
      * 拦截类的全限定名
@@ -42,7 +45,7 @@ public class NacosHealthDeclarer extends AbstractDoubleRegistryDeclarer {
 
     @Override
     public ClassMatcher getClassMatcher() {
-        return ClassMatcher.nameEquals(ENHANCE_CLASS);
+        return ClassMatcher.nameContains(ENHANCE_CLASSES);
     }
 
     @Override

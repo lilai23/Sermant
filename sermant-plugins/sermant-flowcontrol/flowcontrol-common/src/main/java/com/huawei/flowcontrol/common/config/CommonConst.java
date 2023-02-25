@@ -41,6 +41,11 @@ public class CommonConst {
     public static final String DUBBO_APPLICATION = "application";
 
     /**
+     * dubbo接口
+     */
+    public static final String DUBBO_INTERFACE = "interface";
+
+    /**
      * 从url获取的版本键名
      */
     public static final String URL_VERSION_KEY = "version";
@@ -254,6 +259,11 @@ public class CommonConst {
      * 限流请求数转换
      */
     public static final double RATE_DIV_POINT = 1000.0d;
+
+    /**
+     * 记录请求时间key
+     */
+    public static final String REQUEST_START_TIME = "requestStartTime";
 
     private CommonConst() {
     }

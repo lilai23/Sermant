@@ -31,7 +31,7 @@ public class HeartbeatConstant {
     /**
      * 最小心跳间隔
      */
-    public static final long HEARTBEAT_MINIMAL_INTERVAL = 1000L;
+    public static final long HEARTBEAT_MINIMAL_INTERVAL = 3000L;
 
     private HeartbeatConstant() {
     }

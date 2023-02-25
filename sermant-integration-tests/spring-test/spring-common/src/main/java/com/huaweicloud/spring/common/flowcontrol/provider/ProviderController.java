@@ -19,8 +19,10 @@ package com.huaweicloud.spring.common.flowcontrol.provider;
 
 import com.huaweicloud.spring.common.flowcontrol.Constants;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -33,6 +35,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @ResponseBody
 @RequestMapping
 public class ProviderController {
+    @Value("${server.port:8099}")
+    private int port;
+
     /**
      * 限流测试
      *
@@ -98,6 +103,66 @@ public class ProviderController {
     }
 
     /**
+     * 请求头匹配测试
+     *
+     * @return ok
+     */
+    @RequestMapping("headerExact")
+    public String headerExact() {
+        return Constants.HTTP_OK;
+    }
+
+    /**
+     * 请求头匹配测试
+     *
+     * @return ok
+     */
+    @RequestMapping("headerPrefix")
+    public String headerPrefix() {
+        return Constants.HTTP_OK;
+    }
+
+    /**
+     * 请求头匹配测试
+     *
+     * @return ok
+     */
+    @RequestMapping("headerSuffix")
+    public String headerSuffix() {
+        return Constants.HTTP_OK;
+    }
+
+    /**
+     * 请求头匹配测试
+     *
+     * @return ok
+     */
+    @RequestMapping("headerContains")
+    public String headerContains() {
+        return Constants.HTTP_OK;
+    }
+
+    /**
+     * 请求头匹配测试
+     *
+     * @return ok
+     */
+    @RequestMapping("headerCompareMatch")
+    public String headerCompareMatch() {
+        return Constants.HTTP_OK;
+    }
+
+    /**
+     * 请求头匹配测试
+     *
+     * @return ok
+     */
+    @RequestMapping("headerCompareNotMatch")
+    public String headerCompareNotMatch() {
+        return Constants.HTTP_OK;
+    }
+
+    /**
      * 匹配服务名
      *
      * @return ok
@@ -155,5 +220,45 @@ public class ProviderController {
     @RequestMapping("faultDelay")
     public String faultDelay() {
         return Constants.HTTP_OK;
+    }
+
+    /**
+     * 测试feign调用
+     *
+     * @return ok
+     */
+    @RequestMapping("feignRegistry")
+    public String feignRegistry() {
+        return Constants.HTTP_OK + ", port is " + port;
+    }
+
+    /**
+     * 测试feign调用
+     *
+     * @return ok
+     */
+    @RequestMapping(value = "feignRegistryPost", method = RequestMethod.POST)
+    public String feignRegistryPost() {
+        return Constants.HTTP_OK + ", port is " + port;
+    }
+
+    /**
+     * 测试Cloud注册调用
+     *
+     * @return ok
+     */
+    @RequestMapping(value = "testCloudRegistry", method = RequestMethod.GET)
+    public String testCloudRegistry() {
+        return String.valueOf(port);
+    }
+
+    /**
+     * 测试优雅上下线
+     *
+     * @return ok
+     */
+    @RequestMapping(value = "testGraceful", method = RequestMethod.GET)
+    public String testGraceful() {
+        return String.valueOf(port);
     }
 }

@@ -16,9 +16,12 @@
 
 package com.huaweicloud.integration.service;
 
-import com.alibaba.dubbo.config.RegistryConfig;
+import com.alibaba.dubbo.common.extension.ExtensionLoader;
+import com.alibaba.dubbo.registry.RegistryFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
+import java.util.ArrayList;
 
 /**
  * 测试接口
@@ -27,8 +30,17 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @since 2022-04-28
  */
 public class FooServiceImpl implements FooService {
-    @Autowired
-    private RegistryConfig registryConfig;
+    @Value("${service_meta_zone:${SERVICE_META_ZONE:${service.meta.zone:bar}}}")
+    private String zone;
+
+    @Value("${service_meta_version:${SERVICE_META_VERSION:${service.meta.version:1.0.0}}}")
+    private String version;
+
+    @Value("${spring.application.name}")
+    private String name;
+
+    @Value("${service_meta_parameters:${SERVICE_META_PARAMETERS:${service.meta.parameters:}}}")
+    private String parameters;
 
     @Override
     public String foo(String str) {
@@ -42,6 +54,15 @@ public class FooServiceImpl implements FooService {
 
     @Override
     public String getRegistryProtocol() {
-        return registryConfig.getProtocol();
+        return new ArrayList<>(ExtensionLoader.getExtensionLoader(RegistryFactory.class).getLoadedExtensions()).get(0);
+    }
+
+    @Override
+    public String getMetadata(boolean exit) {
+        if (exit) {
+            System.exit(0);
+        }
+        return "I'm " + name + ", my version is " + version + ", my zone is " + zone + ", my parameters is ["
+            + parameters + "].";
     }
 }

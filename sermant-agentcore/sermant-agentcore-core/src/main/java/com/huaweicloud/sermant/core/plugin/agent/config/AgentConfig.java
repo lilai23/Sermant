@@ -44,6 +44,11 @@ public class AgentConfig implements BaseConfig {
     private Set<String> ignoredPrefixes = Collections.singleton("com.huawei.sermant");
 
     /**
+     * 增强忽略接口集，该集合中定义的接口用于排除增强过程中被忽略的类，默认包含{@org.springframework.cglib.proxy.Factory}，强制，否则会跟spring动态代理产生冲突，导致java.lang.VerifyError
+     */
+    private Set<String> ignoredInterfaces = Collections.singleton("org.springframework.cglib.proxy.Factory");
+
+    /**
      * 是否在增强过程中输出检索日志
      */
     private boolean isShowEnhanceLogEnable = false;
@@ -63,6 +68,11 @@ public class AgentConfig implements BaseConfig {
      */
     private Set<String> serviceBlackList = Collections.emptySet();
 
+    /**
+     * 拦截插件服务名单
+     */
+    private Set<String> serviceInjectList = Collections.emptySet();
+
     public boolean isEnhanceBootStrapEnable() {
         return isEnhanceBootStrapEnable;
     }
@@ -73,6 +83,14 @@ public class AgentConfig implements BaseConfig {
 
     public Set<String> getIgnoredPrefixes() {
         return ignoredPrefixes;
+    }
+
+    public Set<String> getIgnoredInterfaces() {
+        return ignoredInterfaces;
+    }
+
+    public void setIgnoredInterfaces(Set<String> ignoredInterfaces) {
+        this.ignoredInterfaces = ignoredInterfaces;
     }
 
     public void setIgnoredPrefixes(Set<String> ignoredPrefixes) {
@@ -101,6 +119,14 @@ public class AgentConfig implements BaseConfig {
 
     public void setServiceBlackList(Set<String> serviceBlackList) {
         this.serviceBlackList = serviceBlackList;
+    }
+
+    public Set<String> getServiceInjectList() {
+        return serviceInjectList;
+    }
+
+    public void setServiceInjectList(Set<String> serviceInjectList) {
+        this.serviceInjectList = serviceInjectList;
     }
 
     public CombineStrategy getCombineStrategy() {

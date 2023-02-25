@@ -48,6 +48,46 @@ public enum SermantTestType {
     LOAD_BALANCER,
 
     /**
+     * springboot注册发现测试
+     */
+    BOOT_REGISTRY,
+
+    /**
+     * SpringCloud注册发现测试
+     */
+    CLOUD_REGISTRY,
+
+    /**
+     * 路由测试
+     */
+    ROUTER,
+
+    /**
+     * 标签路由配置
+     */
+    TAG_ROUTER_CONFIG,
+
+    /**
+     * 标签路由测试
+     */
+    TAG_ROUTER,
+
+    /**
+     * 优雅上下线测试
+     */
+    GRACEFUL,
+
+    /**
+     * 监控测试
+     */
+    MONITOR,
+
+    /**
+     * 服务可见性测试
+     */
+    VISIBILITY,
+
+    /**
      * 测试所有类型
      */
     ALL;

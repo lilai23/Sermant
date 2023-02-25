@@ -18,6 +18,8 @@ package com.huaweicloud.sermant.router.spring.service;
 
 import com.huaweicloud.sermant.core.plugin.service.PluginService;
 
+import java.util.Set;
+
 /**
  * 配置服务
  *
@@ -34,10 +36,9 @@ public interface SpringConfigService extends PluginService {
     void init(String cacheName, String serviceName);
 
     /**
-     * 配置是否无效
+     * 获取规则key
      *
-     * @param cacheName 缓存名
-     * @return 是否无效
+     * @return 规则key
      */
-    boolean isInValid(String cacheName);
+    Set<String> getMatchKeys();
 }

@@ -18,14 +18,14 @@ package com.huaweicloud.sermant.router.spring.interceptor;
 
 import com.huaweicloud.sermant.core.plugin.agent.entity.ExecuteContext;
 import com.huaweicloud.sermant.core.plugin.agent.interceptor.AbstractInterceptor;
+import com.huaweicloud.sermant.core.plugin.config.PluginConfigManager;
 import com.huaweicloud.sermant.core.service.ServiceManager;
 import com.huaweicloud.sermant.core.utils.StringUtils;
-import com.huaweicloud.sermant.router.common.constants.RouterConstant;
+import com.huaweicloud.sermant.router.common.config.RouterConfig;
+import com.huaweicloud.sermant.router.common.request.RequestData;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
-import com.huaweicloud.sermant.router.spring.cache.RequestData;
+import com.huaweicloud.sermant.router.common.utils.ThreadLocalUtils;
 import com.huaweicloud.sermant.router.spring.service.LoadBalancerService;
-import com.huaweicloud.sermant.router.spring.service.SpringConfigService;
-import com.huaweicloud.sermant.router.spring.utils.ThreadLocalUtils;
 
 import reactor.core.publisher.Flux;
 
@@ -43,26 +43,20 @@ import java.util.Optional;
  * @since 2022-07-12
  */
 public class ServiceInstanceListSupplierInterceptor extends AbstractInterceptor {
-    private final SpringConfigService configService;
     private final LoadBalancerService loadBalancerService;
+
+    private final RouterConfig routerConfig;
 
     /**
      * 构造方法
      */
     public ServiceInstanceListSupplierInterceptor() {
-        configService = ServiceManager.getService(SpringConfigService.class);
         loadBalancerService = ServiceManager.getService(LoadBalancerService.class);
+        routerConfig = PluginConfigManager.getPluginConfig(RouterConfig.class);
     }
 
     @Override
     public ExecuteContext before(ExecuteContext context) {
-        if (configService.isInValid(RouterConstant.SPRING_CACHE_NAME)) {
-            return context;
-        }
-        RequestData requestData = ThreadLocalUtils.getRequestData();
-        if (requestData == null) {
-            return context;
-        }
         Object object = context.getObject();
         String serviceId = getServiceId(object).orElse(null);
         if (StringUtils.isBlank(serviceId)) {
@@ -74,9 +68,16 @@ public class ServiceInstanceListSupplierInterceptor extends AbstractInterceptor 
             if (CollectionUtils.isEmpty(instances)) {
                 return context;
             }
+            RequestData requestData = ThreadLocalUtils.getRequestData();
+            if (requestData == null) {
+                context.skip(Flux.just(loadBalancerService
+                    .getZoneInstances(serviceId, instances, routerConfig.isEnabledSpringZoneRouter())));
+                return context;
+            }
             List<Object> list = loadBalancerService.getTargetInstances(serviceId, instances, requestData.getPath(),
                 requestData.getHeader());
-            context.skip(Flux.just(list));
+            context.skip(Flux.just(
+                loadBalancerService.getZoneInstances(serviceId, list, routerConfig.isEnabledSpringZoneRouter())));
         }
         return context;
     }

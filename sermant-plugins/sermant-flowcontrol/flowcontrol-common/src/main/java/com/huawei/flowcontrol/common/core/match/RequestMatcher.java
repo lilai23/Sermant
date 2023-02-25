@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-2022 Huawei Technologies Co., Ltd. All rights reserved.
+ * Copyright (C) 2021-2022 Huawei Technologies Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ package com.huawei.flowcontrol.common.core.match;
 import com.huawei.flowcontrol.common.core.match.operator.Operator;
 import com.huawei.flowcontrol.common.core.match.operator.OperatorManager;
 import com.huawei.flowcontrol.common.entity.RequestEntity;
+import com.huawei.flowcontrol.common.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -137,7 +138,7 @@ public class RequestMatcher implements Matcher {
         // 匹配请求头
         for (Map.Entry<String, RawOperator> entry : this.headers.entrySet()) {
             final String headerValue = requestHeaders.get(entry.getKey());
-            if (headerValue == null) {
+            if (StringUtils.isEmpty(headerValue)) {
                 return false;
             }
             if (!operatorMatch(headerValue, entry.getValue())) {
@@ -171,7 +172,7 @@ public class RequestMatcher implements Matcher {
                 // 无相关匹配器，数据错误！
                 return false;
             }
-            if (!matchOperator.match(target, entry.getValue())) {
+            if (!matchOperator.match(target, String.valueOf(entry.getValue()))) {
                 // 条件全部匹配
                 return false;
             }

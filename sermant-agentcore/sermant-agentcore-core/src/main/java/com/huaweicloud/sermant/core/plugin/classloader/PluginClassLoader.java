@@ -16,9 +16,13 @@
 
 package com.huaweicloud.sermant.core.plugin.classloader;
 
+import com.huaweicloud.sermant.core.common.BootArgsIndexer;
+import com.huaweicloud.sermant.core.common.CommonConstant;
 import com.huaweicloud.sermant.core.config.ConfigManager;
 import com.huaweicloud.sermant.core.plugin.agent.config.AgentConfig;
 
+import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
@@ -43,8 +47,14 @@ public class PluginClassLoader extends URLClassLoader {
      */
     private final Map<String, Class<?>> pluginClassMap = new HashMap<>();
 
-    public PluginClassLoader(URL[] urls) {
-        super(urls);
+    /**
+     * Constructor.
+     *
+     * @param urls   Url of plugin package
+     * @param parent parent classloader
+     */
+    public PluginClassLoader(URL[] urls, ClassLoader parent) {
+        super(urls, parent);
     }
 
     /**
@@ -74,6 +84,11 @@ public class PluginClassLoader extends URLClassLoader {
     }
 
     @Override
+    public Class<?> loadClass(String name) throws ClassNotFoundException {
+        return this.loadClass(name, false);
+    }
+
+    @Override
     public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         synchronized (getClassLoadingLock(name)) {
             Class<?> clazz = null;
@@ -82,12 +97,40 @@ public class PluginClassLoader extends URLClassLoader {
             }
             if (clazz == null) {
                 clazz = super.loadClass(name, resolve);
+
+                // 通过PluginClassLoader的super.loadClass方法把从自身加载的类放入缓存
+                if (clazz != null && clazz.getClassLoader() == this) {
+                    pluginClassMap.put(name, clazz);
+                }
             }
             if (resolve) {
                 resolveClass(clazz);
             }
             return clazz;
         }
+    }
+
+    @Override
+    public URL getResource(String name) {
+        URL url = null;
+
+        // 针对日志配置文件，定制化getResource方法，首先获取agent/config/logback.xml,其次PluginClassloader下资源文件中的logback.xml
+        if (CommonConstant.LOG_SETTING_FILE_NAME.equals(name)) {
+            File logSettingFile = BootArgsIndexer.getLogSettingFile();
+            if (logSettingFile.exists() && logSettingFile.isFile()) {
+                try {
+                    url = logSettingFile.toURI().toURL();
+                } catch (MalformedURLException e) {
+                    url = findResource(name);
+                }
+            } else {
+                url = findResource(name);
+            }
+        }
+        if (url == null) {
+            url = super.getResource(name);
+        }
+        return url;
     }
 
     @Override

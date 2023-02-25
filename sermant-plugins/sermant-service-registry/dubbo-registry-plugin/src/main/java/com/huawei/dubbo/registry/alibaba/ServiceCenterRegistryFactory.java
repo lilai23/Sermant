@@ -19,12 +19,16 @@ package com.huawei.dubbo.registry.alibaba;
 import com.huawei.dubbo.registry.cache.DubboCache;
 import com.huawei.dubbo.registry.utils.ReflectUtils;
 
+import com.huaweicloud.sermant.core.common.LoggerFactory;
+
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.registry.Registry;
 import com.alibaba.dubbo.registry.support.AbstractRegistryFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * sc注册工厂
@@ -34,6 +38,7 @@ import java.util.Optional;
  */
 public class ServiceCenterRegistryFactory extends AbstractRegistryFactory {
     private static final String ALIBABA_REGISTRY_CLASS_NAME = "com.huawei.dubbo.registry.alibaba.ServiceCenterRegistry";
+    private static final Logger LOGGER = LoggerFactory.getLogger();
 
     @Override
     protected Registry createRegistry(URL url) {
@@ -46,10 +51,10 @@ public class ServiceCenterRegistryFactory extends AbstractRegistryFactory {
                 // 由于plugin不能直接new宿主的接口实现类，所以只能手动new出来给宿主
                 return (Registry) registryClass.get().getConstructor(URL.class).newInstance(url);
             }
-            return new com.huawei.dubbo.registry.alibaba.ServiceCenterRegistry(url);
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException
             | InvocationTargetException e) {
-            return new com.huawei.dubbo.registry.alibaba.ServiceCenterRegistry(url);
+            LOGGER.log(Level.WARNING, "Can not get the registry", e);
         }
+        return new com.huawei.dubbo.registry.alibaba.ServiceCenterRegistry(url);
     }
 }

@@ -1,0 +1,42 @@
+namespace:
+  # injector部署的namespace(注意: 必须和certificate.sh中的namespace保持一致)
+  name: default
+
+injector:
+  # 实例数
+  replicas: 2
+  image:
+    # injector镜像地址(按真实场景配置)
+    addr:
+    # Always(总是拉取 pull) IfNotPresent(默认值,本地有则使用本地镜像,不拉取) Never(只使用本地镜像，从不拉取)
+    pullPolicy: IfNotPresent
+    # 拉取镜像的密钥
+    pullSecrets: default-secret
+
+agent:
+  image:
+    # agent镜像地址(按真实场景配置)
+    addr:
+    # Always(总是拉取 pull) IfNotPresent(默认值,本地有则使用本地镜像,不拉取) Never(只使用本地镜像，从不拉取)
+    pullPolicy: IfNotPresent
+
+config:
+  # 配置中心类型: ZOOKEEPER/KIE
+  type: ZOOKEEPER
+  # 配置中心地址
+  endpoints: http://localhost:30110
+registry:
+  # 注册中心地址
+  endpoints: http://localhost:30100
+
+# 支持配置业务应用通用的环境变量(key相同的情况下该处配置的优先级低于yaml中env的配置)
+configMap:
+  # 是否开启注入configMap
+  enabled: false
+  # 注入configMap的namespace，需要与业务应用的namespace保持一致
+  namespaces: [default]
+  # 配置方式如下:
+  # env:
+  #   TEST_ENV1: abc
+  #   TEST_ENV2: 123456
+  env:

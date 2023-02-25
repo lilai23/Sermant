@@ -16,10 +16,12 @@
 
 package com.huaweicloud.sermant.router.spring.utils;
 
+import com.huaweicloud.sermant.core.utils.StringUtils;
 import com.huaweicloud.sermant.router.common.config.RouterConfig;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 import com.huaweicloud.sermant.router.common.utils.ReflectUtils;
 
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -30,6 +32,8 @@ import java.util.Map;
  */
 public class SpringRouterUtils {
     private static final String VERSION_KEY = "version";
+
+    private static final String ZONE_KEY = "zone";
 
     private SpringRouterUtils() {
     }
@@ -55,9 +59,13 @@ public class SpringRouterUtils {
             return;
         }
         metadata.putIfAbsent(VERSION_KEY, routerConfig.getRouterVersion());
+        if (StringUtils.isExist(routerConfig.getZone())) {
+            metadata.putIfAbsent(ZONE_KEY, routerConfig.getZone());
+        }
         Map<String, String> parameters = routerConfig.getParameters();
         if (!CollectionUtils.isEmpty(parameters)) {
-            parameters.forEach(metadata::putIfAbsent);
+            // 请求头在http请求中，会统一转成小写
+            parameters.forEach((key, value) -> metadata.putIfAbsent(key.toLowerCase(Locale.ROOT), value));
         }
     }
 }

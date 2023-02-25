@@ -16,25 +16,30 @@
 
 package com.huaweicloud.sermant.router.config.utils;
 
+import com.huaweicloud.sermant.core.common.LoggerFactory;
 import com.huaweicloud.sermant.core.utils.StringUtils;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
-import com.huaweicloud.sermant.router.config.label.entity.Match;
-import com.huaweicloud.sermant.router.config.label.entity.MatchRule;
-import com.huaweicloud.sermant.router.config.label.entity.Route;
-import com.huaweicloud.sermant.router.config.label.entity.RouterConfiguration;
-import com.huaweicloud.sermant.router.config.label.entity.Rule;
+import com.huaweicloud.sermant.router.config.entity.Match;
+import com.huaweicloud.sermant.router.config.entity.MatchRule;
+import com.huaweicloud.sermant.router.config.entity.Route;
+import com.huaweicloud.sermant.router.config.entity.RouterConfiguration;
+import com.huaweicloud.sermant.router.config.entity.Rule;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -44,9 +49,11 @@ import java.util.regex.Pattern;
  * @since 2022-07-11
  */
 public class RuleUtils {
-    private static final Set<String> HEADER_KEYS = new CopyOnWriteArraySet<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger();
 
-    private static final Map<String, Set<String>> SERVICE_HEADER_KEYS = new ConcurrentHashMap<>();
+    private static final Set<String> MATCH_KEYS = new CopyOnWriteArraySet<>();
+
+    private static final Map<String, Set<String>> SERVICE_MATCH_KEYS = new ConcurrentHashMap<>();
 
     private static final int ONO_HUNDRED = 100;
 
@@ -58,12 +65,12 @@ public class RuleUtils {
      *
      * @param configuration 路由配置
      * @param targetService 目标服务
-     * @param path          dubbo接口名/url路径
-     * @param serviceName   本服务服务名
+     * @param path dubbo接口名/url路径
+     * @param serviceName 本服务服务名
      * @return 目标规则
      */
     public static List<Rule> getRules(RouterConfiguration configuration, String targetService, String path,
-                                      String serviceName) {
+        String serviceName) {
         if (RouterConfiguration.isInValid(configuration)) {
             return Collections.emptyList();
         }
@@ -88,16 +95,17 @@ public class RuleUtils {
      * 获取所有标签
      *
      * @param rules 路由规则
+     * @param isReplaceDash 是否需要替换破折号为点号（dubbo需要）
      * @return 标签
      */
-    public static List<Map<String, String>> getTags(List<Rule> rules) {
+    public static List<Map<String, String>> getTags(List<Rule> rules, boolean isReplaceDash) {
         if (CollectionUtils.isEmpty(rules)) {
             return Collections.emptyList();
         }
         List<Map<String, String>> tags = new ArrayList<>();
         for (Rule rule : rules) {
             for (Route route : rule.getRoute()) {
-                tags.add(route.getTags());
+                tags.add(replaceDash(route.getTags(), isReplaceDash));
             }
         }
         return tags;
@@ -108,24 +116,14 @@ public class RuleUtils {
      *
      * @param configuration 路由配置
      */
-    public static void initHeaderKeys(RouterConfiguration configuration) {
-        HEADER_KEYS.clear();
+    public static void initMatchKeys(RouterConfiguration configuration) {
+        MATCH_KEYS.clear();
         if (RouterConfiguration.isInValid(configuration)) {
             return;
         }
         Map<String, List<Rule>> routeRules = configuration.getRouteRule();
         for (List<Rule> rules : routeRules.values()) {
-            for (Rule rule : rules) {
-                Match match = rule.getMatch();
-                if (match == null) {
-                    continue;
-                }
-                Map<String, List<MatchRule>> headers = match.getHeaders();
-                if (CollectionUtils.isEmpty(headers)) {
-                    continue;
-                }
-                HEADER_KEYS.addAll(headers.keySet());
-            }
+            addKeys(rules, MATCH_KEYS);
         }
     }
 
@@ -133,26 +131,16 @@ public class RuleUtils {
      * 更新header key
      *
      * @param serviceName 服务名
-     * @param rules       路由规则
+     * @param rules 路由规则
      */
-    public static void updateHeaderKeys(String serviceName, List<Rule> rules) {
+    public static void updateMatchKeys(String serviceName, List<Rule> rules) {
         if (CollectionUtils.isEmpty(rules)) {
-            SERVICE_HEADER_KEYS.remove(serviceName);
+            SERVICE_MATCH_KEYS.remove(serviceName);
             return;
         }
-        Set<String> keys = SERVICE_HEADER_KEYS.computeIfAbsent(serviceName, value -> new CopyOnWriteArraySet<>());
+        Set<String> keys = SERVICE_MATCH_KEYS.computeIfAbsent(serviceName, value -> new CopyOnWriteArraySet<>());
         keys.clear();
-        for (Rule rule : rules) {
-            Match match = rule.getMatch();
-            if (match == null) {
-                continue;
-            }
-            Map<String, List<MatchRule>> headers = match.getHeaders();
-            if (CollectionUtils.isEmpty(headers)) {
-                continue;
-            }
-            keys.addAll(headers.keySet());
-        }
+        addKeys(rules, keys);
     }
 
     /**
@@ -160,9 +148,9 @@ public class RuleUtils {
      *
      * @return 缓存的key
      */
-    public static Set<String> getHeaderKeys() {
-        Set<String> keys = new HashSet<>(HEADER_KEYS);
-        for (Set<String> value : SERVICE_HEADER_KEYS.values()) {
+    public static Set<String> getMatchKeys() {
+        Set<String> keys = new HashSet<>(MATCH_KEYS);
+        for (Set<String> value : SERVICE_MATCH_KEYS.values()) {
             keys.addAll(value);
         }
         return Collections.unmodifiableSet(keys);
@@ -172,29 +160,58 @@ public class RuleUtils {
      * 选取路由
      *
      * @param routes 路由规则
+     * @param isReplaceDash 是否需要替换破折号为点号（dubbo需要）
      * @return 目标路由
      */
-    public static RouteResult getTargetTags(List<Route> routes) {
+    public static RouteResult<?> getTargetTags(List<Route> routes, boolean isReplaceDash) {
         List<Map<String, String>> tags = new ArrayList<>();
         int begin = 1;
         int num = ThreadLocalRandom.current().nextInt(ONO_HUNDRED) + 1;
-        boolean isMatch = false;
         for (Route route : routes) {
             Integer weight = route.getWeight();
             if (weight == null) {
                 continue;
             }
-            Map<String, String> currentTag = route.getTags();
+            Map<String, String> currentTag = replaceDash(route.getTags(), isReplaceDash);
             if (num >= begin && num <= begin + weight - 1) {
-                tags.clear();
-                tags.add(currentTag);
-                isMatch = true;
-                break;
+                return new RouteResult<>(true, currentTag);
             }
             begin += weight;
             tags.add(currentTag);
         }
-        return new RouteResult(isMatch, tags);
+        return new RouteResult<>(false, tags);
+    }
+
+    /**
+     * 去掉无效的规则
+     *
+     * @param list 路由规则
+     */
+    public static void removeInvalidRules(List<Rule> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return;
+        }
+        Iterator<Rule> iterator = list.iterator();
+        while (iterator.hasNext()) {
+            Rule rule = iterator.next();
+            List<Route> routes = rule.getRoute();
+
+            // 去掉没有配置路由的规则
+            if (CollectionUtils.isEmpty(routes)) {
+                LOGGER.warning("Routes are empty, rule will be removed.");
+                iterator.remove();
+                continue;
+            }
+
+            // 去掉无效的规则
+            removeInvalidMatch(rule.getMatch());
+
+            // 无attachments规则，将headers规则更新到attachments规则
+            setAttachmentsByHeaders(rule.getMatch());
+
+            // 去掉无效的路由
+            removeInvalidRoute(routes);
+        }
     }
 
     /**
@@ -202,7 +219,7 @@ public class RuleUtils {
      *
      * @param match 匹配规则
      */
-    public static void removeInvalidRules(Match match) {
+    private static void removeInvalidMatch(Match match) {
         if (match == null) {
             return;
         }
@@ -212,14 +229,16 @@ public class RuleUtils {
     }
 
     /**
-     * 将headers规则写入attachemnts
+     * 将headers规则写入attachments
      *
      * @param match headers匹配规则
      */
-    public static void setAttachmentsByHeaders(Match match) {
-        if (match == null) {
+    private static void setAttachmentsByHeaders(Match match) {
+        if (match == null || !CollectionUtils.isEmpty(match.getAttachments())) {
             return;
         }
+
+        // attachments兼容headers
         match.setAttachments(match.getHeaders());
     }
 
@@ -228,8 +247,11 @@ public class RuleUtils {
      *
      * @param routeList 路由
      */
-    public static void removeInvalidRoute(List<Route> routeList) {
-        routeList.removeIf(RuleUtils::isInvalidRoute);
+    private static void removeInvalidRoute(List<Route> routeList) {
+        boolean removed = routeList.removeIf(RuleUtils::isInvalidRoute);
+        if (removed) {
+            LOGGER.warning("Some invalid routes had been removed, please check your router configuration.");
+        }
     }
 
     private static void removeInvalidMatchRule(Map<String, List<MatchRule>> matchRuleMap) {
@@ -295,32 +317,70 @@ public class RuleUtils {
 
     private static boolean isInvalidMatchRule(MatchRule matchRule) {
         return matchRule == null || matchRule.getValueMatch() == null
-                || CollectionUtils.isEmpty(matchRule.getValueMatch().getValues())
-                || matchRule.getValueMatch().getMatchStrategy() == null;
+            || CollectionUtils.isEmpty(matchRule.getValueMatch().getValues())
+            || matchRule.getValueMatch().getMatchStrategy() == null;
     }
 
     private static boolean isInvalidRoute(Route route) {
         return route == null || CollectionUtils.isEmpty(route.getTags());
     }
 
+    private static void addKeys(List<Rule> rules, Set<String> keys) {
+        for (Rule rule : rules) {
+            Match match = rule.getMatch();
+            if (match == null) {
+                continue;
+            }
+            addKeys(keys, match.getHeaders());
+            addKeys(keys, match.getAttachments());
+        }
+    }
+
+    private static void addKeys(Set<String> keys, Map<String, List<MatchRule>> matchRule) {
+        if (CollectionUtils.isEmpty(matchRule)) {
+            return;
+        }
+        for (String key : matchRule.keySet()) {
+            // 请求头在http请求中，会统一转成小写
+            keys.add(key.toLowerCase(Locale.ROOT));
+        }
+    }
+
+    private static Map<String, String> replaceDash(Map<String, String> tags, boolean isReplaceDash) {
+        if (!isReplaceDash) {
+            return tags;
+        }
+        Map<String, String> map = new HashMap<>();
+        tags.forEach((key, value) -> {
+            if (key != null && key.contains("-")) {
+                // dubbo会把key中的"-"替换成"."
+                map.put(key.replace("-", "."), value);
+            } else {
+                map.put(key, value);
+            }
+        });
+        return map;
+    }
+
     /**
      * 匹配结果
      *
+     * @param <T> 泛型
      * @author provenceee
      * @since 2022-07-17
      */
-    public static class RouteResult {
+    public static class RouteResult<T> {
         private final boolean match;
 
-        private final List<Map<String, String>> tags;
+        private final T tags;
 
         /**
          * 构造方法
          *
          * @param match 是否匹配
-         * @param tags  目标路由
+         * @param tags 目标路由
          */
-        public RouteResult(boolean match, List<Map<String, String>> tags) {
+        public RouteResult(boolean match, T tags) {
             this.match = match;
             this.tags = tags;
         }
@@ -329,7 +389,7 @@ public class RuleUtils {
             return match;
         }
 
-        public List<Map<String, String>> getTags() {
+        public T getTags() {
             return tags;
         }
     }

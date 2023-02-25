@@ -16,13 +16,13 @@
 
 package com.huaweicloud.sermant.router.config.handler;
 
-import com.huaweicloud.sermant.core.plugin.subscribe.processor.OrderConfigEvent;
 import com.huaweicloud.sermant.core.service.dynamicconfig.common.DynamicConfigEvent;
 import com.huaweicloud.sermant.core.service.dynamicconfig.common.DynamicConfigEventType;
 import com.huaweicloud.sermant.router.common.constants.RouterConstant;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
-import com.huaweicloud.sermant.router.config.label.entity.RouterConfiguration;
-import com.huaweicloud.sermant.router.config.label.entity.Rule;
+import com.huaweicloud.sermant.router.config.cache.ConfigCache;
+import com.huaweicloud.sermant.router.config.entity.RouterConfiguration;
+import com.huaweicloud.sermant.router.config.entity.Rule;
 import com.huaweicloud.sermant.router.config.utils.RuleUtils;
 
 import com.alibaba.fastjson.JSONArray;
@@ -42,10 +42,11 @@ import java.util.Map.Entry;
  */
 public class RouterConfigHandler extends AbstractConfigHandler {
     @Override
-    public void handle(DynamicConfigEvent event, RouterConfiguration configuration) {
+    public void handle(DynamicConfigEvent event, String cacheName) {
+        RouterConfiguration configuration = ConfigCache.getLabel(cacheName);
         if (event.getEventType() == DynamicConfigEventType.DELETE) {
             configuration.resetRouteRule(Collections.emptyMap());
-            RuleUtils.initHeaderKeys(configuration);
+            RuleUtils.initMatchKeys(configuration);
             return;
         }
         Map<String, String> routeRuleMap = getRouteRuleMap(event);
@@ -56,51 +57,27 @@ public class RouterConfigHandler extends AbstractConfigHandler {
                 continue;
             }
             List<Rule> list = JSONArray.parseArray(JSONObject.toJSONString(routeRuleList), Rule.class);
-            if (CollectionUtils.isEmpty(list)) {
-                continue;
+            RuleUtils.removeInvalidRules(list);
+            if (!CollectionUtils.isEmpty(list)) {
+                list.sort((o1, o2) -> o2.getPrecedence() - o1.getPrecedence());
+                routeRule.put(entry.getKey(), list);
             }
-            for (Rule rule : list) {
-                // 去掉无效的规则
-                RuleUtils.removeInvalidRules(rule.getMatch());
-
-                // 去掉无效的路由
-                RuleUtils.removeInvalidRoute(rule.getRoute());
-            }
-            list.sort((o1, o2) -> o2.getPrecedence() - o1.getPrecedence());
-            routeRule.put(entry.getKey(), list);
         }
         configuration.resetRouteRule(routeRule);
-        RuleUtils.initHeaderKeys(configuration);
+        RuleUtils.initMatchKeys(configuration);
+    }
+
+    @Override
+    public boolean shouldHandle(String key) {
+        return RouterConstant.ROUTER_KEY_PREFIX.equals(key);
     }
 
     private Map<String, String> getRouteRuleMap(DynamicConfigEvent event) {
-        if (event instanceof OrderConfigEvent) {
-            Map<String, Object> allData = ((OrderConfigEvent) event).getAllData();
-            String prefix =
-                RouterConstant.ROUTER_CONFIG_SERVICECOMB_KEY + "." + RouterConstant.ROUTER_CONFIG_ROUTE_RULE_KEY + ".";
-            Map<String, String> routeRuleMap = new HashMap<>();
-            for (Entry<String, Object> entry : allData.entrySet()) {
-                if (!entry.getKey().startsWith(prefix)) {
-                    continue;
-                }
-                Object value = entry.getValue();
-                if (value instanceof String) {
-                    routeRuleMap.put(entry.getKey().substring(prefix.length()), (String) value);
-                } else {
-                    routeRuleMap.put(entry.getKey().substring(prefix.length()), yaml.dump(value));
-                }
-            }
-            return routeRuleMap;
-        }
         String content = event.getContent();
-        Map<String, Map<String, Map<String, String>>> load = yaml.load(content);
-        if (CollectionUtils.isEmpty(load)) {
+        Map<String, String> routeRuleMap = yaml.load(content);
+        if (CollectionUtils.isEmpty(routeRuleMap)) {
             return Collections.emptyMap();
         }
-        Map<String, Map<String, String>> servicecomb = load.get(RouterConstant.ROUTER_CONFIG_SERVICECOMB_KEY);
-        if (CollectionUtils.isEmpty(servicecomb)) {
-            return Collections.emptyMap();
-        }
-        return servicecomb.get(RouterConstant.ROUTER_CONFIG_ROUTE_RULE_KEY);
+        return routeRuleMap;
     }
 }

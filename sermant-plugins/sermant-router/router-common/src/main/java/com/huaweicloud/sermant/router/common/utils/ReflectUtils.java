@@ -19,11 +19,14 @@ package com.huaweicloud.sermant.router.common.utils;
 import com.huaweicloud.sermant.core.common.LoggerFactory;
 
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**
@@ -34,6 +37,14 @@ import java.util.logging.Logger;
  */
 public class ReflectUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger();
+
+    private static final Map<String, AccessibleObject> ACCESSIBLE_OBJECT_MAP = new ConcurrentHashMap<>();
+
+    private static final Map<String, Optional<Field>> FIELD_MAP = new ConcurrentHashMap<>();
+
+    private static final Map<String, Optional<Method>> METHOD_MAP = new ConcurrentHashMap<>();
+
+    private static final int EXTRA_LENGTH_FOR_METHOD_KEY = 3;
 
     private ReflectUtils() {
     }
@@ -46,15 +57,12 @@ public class ReflectUtils {
      * @return 私有字段值
      */
     public static Optional<Object> getFieldValue(Object obj, String fieldName) {
-        Class<?> currClass = obj.getClass();
-        while (currClass != Object.class) {
+        Optional<Field> field = getField(obj, fieldName);
+        if (field.isPresent()) {
             try {
-                return Optional.ofNullable(getAccessibleObject(currClass.getDeclaredField(fieldName)).get(obj));
-            } catch (NoSuchFieldException e) {
-                currClass = currClass.getSuperclass();
-            } catch (IllegalAccessException e) {
-                LOGGER.warning("Cannot get the field, fieldName is " + fieldName);
-                return Optional.empty();
+                return Optional.ofNullable(field.get().get(obj));
+            } catch (IllegalAccessException ignored) {
+                // 忽略
             }
         }
         LOGGER.warning("Cannot get the field, fieldName is " + fieldName);
@@ -69,10 +77,11 @@ public class ReflectUtils {
      * @return 返回setAccessible(true)之后的对象
      */
     public static <T extends AccessibleObject> T getAccessibleObject(T object) {
-        return AccessController.doPrivileged((PrivilegedAction<T>) () -> {
-            object.setAccessible(true);
-            return object;
-        });
+        return (T) ACCESSIBLE_OBJECT_MAP.computeIfAbsent(object.toString(), key ->
+            AccessController.doPrivileged((PrivilegedAction<T>) () -> {
+                object.setAccessible(true);
+                return object;
+            }));
     }
 
     /**
@@ -84,17 +93,6 @@ public class ReflectUtils {
      */
     public static String invokeWithNoneParameterAndReturnString(Object obj, String name) {
         return (String) invokeWithNoneParameter(obj, name);
-    }
-
-    /**
-     * 反射调用无参方法并且返回map
-     *
-     * @param obj
-     * @param name
-     * @return 值
-     */
-    public static Map<String, String> invokeWithNoneParameterAndReturnMap(Object obj, String name) {
-        return (Map<String, String>) invokeWithNoneParameter(obj, name);
     }
 
     /**
@@ -123,14 +121,63 @@ public class ReflectUtils {
 
     private static Optional<Object> invoke(Class<?> invokeClass, Object obj, String name, Object parameter,
         Class<?> parameterClass) {
-        try {
-            if (parameterClass == null) {
-                return Optional.ofNullable(invokeClass.getMethod(name).invoke(obj));
+        Optional<Method> method = METHOD_MAP.computeIfAbsent(buildMethodKey(invokeClass, name, parameterClass), key -> {
+            try {
+                if (parameterClass == null) {
+                    return Optional.of(invokeClass.getMethod(name));
+                }
+                return Optional.of(invokeClass.getMethod(name, parameterClass));
+            } catch (NoSuchMethodException ignored) {
+                // 因版本的原因，有可能会找不到方法，所以可以忽略这些错误
             }
-            return Optional.ofNullable(invokeClass.getMethod(name, parameterClass).invoke(obj, parameter));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            // 因版本的原因，有可能会找不到方法，所以可以忽略这些错误
+            return Optional.empty();
+        });
+        if (method.isPresent()) {
+            try {
+                if (parameterClass == null) {
+                    return Optional.ofNullable(method.get().invoke(obj));
+                }
+                return Optional.ofNullable(method.get().invoke(obj, parameter));
+            } catch (IllegalAccessException | InvocationTargetException ignored) {
+                // 因版本的原因，有可能会找不到方法，所以可以忽略这些错误
+            }
         }
         return Optional.empty();
+    }
+
+    private static Optional<Field> getField(Object obj, String fieldName) {
+        return FIELD_MAP.computeIfAbsent(buildFieldKey(obj, fieldName), key -> {
+            Class<?> currClass = obj.getClass();
+            while (currClass != Object.class) {
+                try {
+                    return Optional.ofNullable(getAccessibleObject(currClass.getDeclaredField(fieldName)));
+                } catch (NoSuchFieldException e) {
+                    currClass = currClass.getSuperclass();
+                }
+            }
+            return Optional.empty();
+        });
+    }
+
+    private static String buildMethodKey(Class<?> clazz, String methodName, Class<?> parameterClass) {
+        String parameterClassName = "";
+        if (parameterClass != null) {
+            parameterClassName = parameterClass.getName();
+        }
+        String className = clazz.getName();
+
+        // 初始化StringBuilder的长度是为了性能
+        StringBuilder sb = new StringBuilder(
+            className.length() + methodName.length() + parameterClassName.length() + EXTRA_LENGTH_FOR_METHOD_KEY);
+        sb.append(className).append("#").append(methodName).append("(").append(parameterClassName).append(")");
+        return sb.toString();
+    }
+
+    private static String buildFieldKey(Object obj, String fieldName) {
+        // 初始化StringBuilder的长度是为了性能
+        String className = obj.getClass().getName();
+        StringBuilder sb = new StringBuilder(className.length() + fieldName.length() + 1);
+        sb.append(className).append(".").append(fieldName);
+        return sb.toString();
     }
 }

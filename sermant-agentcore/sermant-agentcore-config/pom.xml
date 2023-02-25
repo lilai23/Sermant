@@ -14,15 +14,9 @@
 
     <profiles>
         <profile>
-            <id>example</id>
+            <id>test</id>
             <properties>
-                <profile.id>example</profile.id>
-            </properties>
-        </profile>
-        <profile>
-            <id>all</id>
-            <properties>
-                <profile.id>all</profile.id>
+                <profile.id>test</profile.id>
             </properties>
         </profile>
     </profiles>

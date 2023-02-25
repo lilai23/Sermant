@@ -32,11 +32,27 @@ import java.util.Locale;
 public class DynamicConfig implements BaseConfig {
     private static final int TIME_OUT_VALUE = 30000;
 
+    private static final int CONNECT_TIMEOUT = 1000;
+
+    private static final int CONNECT_RETRY_TIMES = 5;
+
     /**
      * 服务器连接超时时间
      */
     @ConfigFieldKey("timeoutValue")
     private int timeoutValue = TIME_OUT_VALUE;
+
+    /**
+     * 连接服务器超时时间
+     */
+    @ConfigFieldKey("connectTimeout")
+    private int connectTimeout = CONNECT_TIMEOUT;
+
+    /**
+     * 连接服务器重试次数
+     */
+    @ConfigFieldKey("connectRetryTimes")
+    private int connectRetryTimes = CONNECT_RETRY_TIMES;
 
     /**
      * 默认分组
@@ -55,6 +71,14 @@ public class DynamicConfig implements BaseConfig {
      */
     @ConfigFieldKey("dynamicConfigType")
     private String serviceType = "NOP";
+
+    private String userName;
+
+    private String password;
+
+    private String privateKey;
+
+    private boolean enableAuth = false;
 
     public int getTimeoutValue() {
         return timeoutValue;
@@ -86,5 +110,53 @@ public class DynamicConfig implements BaseConfig {
 
     public void setServiceType(String serviceType) {
         this.serviceType = serviceType;
+    }
+
+    public int getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    public void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
+    }
+
+    public int getConnectRetryTimes() {
+        return connectRetryTimes;
+    }
+
+    public void setConnectRetryTimes(int connectRetryTimes) {
+        this.connectRetryTimes = connectRetryTimes;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPrivateKey() {
+        return privateKey;
+    }
+
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    public boolean isEnableAuth() {
+        return enableAuth;
+    }
+
+    public void setEnableAuth(boolean enableAuth) {
+        this.enableAuth = enableAuth;
     }
 }

@@ -17,9 +17,15 @@
 
 package com.huawei.flowcontrol.common.init;
 
-import com.huawei.flowcontrol.common.BaseTest;
+import com.huaweicloud.sermant.core.operation.OperationManager;
+import com.huaweicloud.sermant.core.operation.converter.api.YamlConverter;
+import com.huaweicloud.sermant.implement.operation.converter.YamlConverterImpl;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 /**
  * 初始化测试
@@ -27,7 +33,20 @@ import org.junit.Test;
  * @author zhouss
  * @since 2022-03-03
  */
-public class FlowControlInitServiceImplTest extends BaseTest {
+public class FlowControlInitServiceImplTest {
+    private MockedStatic<OperationManager> operationManagerMockedStatic;
+
+    @Before
+    public void setUp() {
+        operationManagerMockedStatic = Mockito.mockStatic(OperationManager.class);
+        operationManagerMockedStatic.when(() -> OperationManager.getOperation(YamlConverter.class)).thenReturn(new YamlConverterImpl());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        operationManagerMockedStatic.close();
+    }
+
     /**
      * 测试初始化流程
      */

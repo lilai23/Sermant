@@ -29,6 +29,16 @@ public class Constant {
     public static final String SC_REGISTRY_PROTOCOL = "sc";
 
     /**
+     * nacos注册协议名
+     */
+    public static final String NACOS_REGISTRY_PROTOCOL = "nacos";
+
+    /**
+     * sc注册ip
+     */
+    public static final String SC_REGISTRY_IP = "localhost:30100";
+
+    /**
      * 协议分隔符
      */
     public static final String PROTOCOL_SEPARATION = "://";
@@ -41,7 +51,7 @@ public class Constant {
     /**
      * sc注册地址
      */
-    public static final String SC_REGISTRY_ADDRESS = SC_REGISTRY_PROTOCOL + PROTOCOL_SEPARATION + "localhost:30100";
+    public static final String SC_REGISTRY_ADDRESS = SC_REGISTRY_PROTOCOL + PROTOCOL_SEPARATION + SC_REGISTRY_IP;
 
     /**
      * 设置协议方法名

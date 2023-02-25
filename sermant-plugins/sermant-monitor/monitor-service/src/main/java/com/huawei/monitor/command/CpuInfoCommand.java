@@ -16,11 +16,10 @@
 
 package com.huawei.monitor.command;
 
-import com.huaweicloud.sermant.core.common.LoggerFactory;
+import com.huaweicloud.sermant.core.utils.StringUtils;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * CPU信息命令
@@ -31,9 +30,17 @@ import java.util.logging.Logger;
  */
 public class CpuInfoCommand extends CommonMonitorCommand<CpuInfoCommand.CpuInfoStat> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger();
+    private static final String COMMAND = "lscpu";
 
-    private static final String COMMAND = "cat /proc/cpuinfo | grep 'core id' | uniq |  wc -l";
+    private static final String CPU_NUM_PRE = "Socket(s)";
+
+    private static final String CPU_CORE_PRE = "Core(s) per socket";
+
+    private static final String SEPARATOR = ":";
+
+    private static final String MATCHES = "^[0-9]*$";
+
+    private static final int LIMIT_SIZE = 2;
 
     @Override
     public String getCommand() {
@@ -46,10 +53,25 @@ public class CpuInfoCommand extends CommonMonitorCommand<CpuInfoCommand.CpuInfoS
     @Override
     public CpuInfoStat parseResult(InputStream inputStream) {
         final List<String> lines = readLines(inputStream);
-        int core = 0;
+        int core;
+        int cpuNum = 0;
+        int cpuCores = 0;
         for (String line : lines) {
-            core = Integer.parseInt(line);
+            if (StringUtils.isBlank(line)) {
+                continue;
+            }
+            String[] cpuInfo = line.split(SEPARATOR);
+            if (cpuInfo.length < LIMIT_SIZE || StringUtils.isBlank(cpuInfo[0]) || StringUtils.isBlank(cpuInfo[1])) {
+                continue;
+            }
+            cpuInfo[1] = cpuInfo[1].trim();
+            if (cpuInfo[0].startsWith(CPU_NUM_PRE) && cpuInfo[1].matches(MATCHES)) {
+                cpuNum = Integer.parseInt(cpuInfo[1]);
+            } else if (cpuInfo[0].startsWith(CPU_CORE_PRE) && cpuInfo[1].matches(MATCHES)) {
+                cpuCores = Integer.parseInt(cpuInfo[1]);
+            }
         }
+        core = cpuNum * cpuCores;
         return new CpuInfoStat(core);
     }
 

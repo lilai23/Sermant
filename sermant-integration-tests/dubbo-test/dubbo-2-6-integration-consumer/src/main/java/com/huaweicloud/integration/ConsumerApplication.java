@@ -16,6 +16,8 @@
 
 package com.huaweicloud.integration;
 
+import com.huaweicloud.integration.configuration.FlowControlExceptionHandler;
+import com.huaweicloud.integration.configuration.FlowRuleConfiguration;
 import com.huaweicloud.integration.controller.ProviderController;
 
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.client.RestTemplate;
 
@@ -38,7 +41,8 @@ import org.springframework.web.client.RestTemplate;
  * @since 2022-04-28
  */
 @SpringBootApplication
-@ImportResource({"classpath:dubbo/consumer.xml"})
+@ImportResource({"classpath:dubbo/dubbo.xml"})
+@Import({FlowRuleConfiguration.class, FlowControlExceptionHandler.class})
 @EnableFeignClients(basePackages = "com.huaweicloud.integration.client")
 @ComponentScan(excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, value = ProviderController.class))
 public class ConsumerApplication {

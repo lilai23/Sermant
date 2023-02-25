@@ -22,6 +22,7 @@ import com.huaweicloud.sermant.core.plugin.agent.interceptor.Interceptor;
 
 import java.util.ListIterator;
 import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -49,9 +50,9 @@ public class CommonMethodAdviser {
      * @param throwable   错误对象
      */
     private static void logError(String scene, ExecuteContext context, Interceptor interceptor, Throwable throwable) {
-        LOGGER.severe(String.format(Locale.ROOT, "An error occurred %s [%s] in interceptor [%s]: [%s].",
-                scene, MethodKeyCreator.getMethodKey(context.getMethod()), interceptor.getClass().getName(),
-                throwable.getMessage()));
+        LOGGER.log(Level.SEVERE, String.format(Locale.ROOT, "An error occurred %s [%s] in interceptor [%s]: ",
+                scene, MethodKeyCreator.getMethodKey(context.getMethod()), interceptor.getClass().getName()),
+            throwable);
     }
 
     /**
@@ -60,8 +61,10 @@ public class CommonMethodAdviser {
      * @param context        执行上下文
      * @param interceptorItr 拦截器双向迭代器
      * @return 执行上下文
+     * @throws Throwable     抛给宿主的异常
      */
-    public static ExecuteContext onMethodEnter(ExecuteContext context, ListIterator<Interceptor> interceptorItr) {
+    public static ExecuteContext onMethodEnter(ExecuteContext context, ListIterator<Interceptor> interceptorItr)
+        throws Throwable {
         return CommonBaseAdviser.onMethodEnter(context, interceptorItr,
                 new CommonBaseAdviser.ExceptionHandler() {
                     @Override
@@ -77,8 +80,10 @@ public class CommonMethodAdviser {
      * @param context        执行上下文
      * @param interceptorItr 拦截器双向迭代器
      * @return 执行上下文
+     * @throws Throwable     抛给宿主的异常
      */
-    public static ExecuteContext onMethodExit(ExecuteContext context, ListIterator<Interceptor> interceptorItr) {
+    public static ExecuteContext onMethodExit(ExecuteContext context, ListIterator<Interceptor> interceptorItr)
+        throws Throwable {
         return CommonBaseAdviser.onMethodExit(context, interceptorItr,
                 new CommonBaseAdviser.ExceptionHandler() {
                     @Override

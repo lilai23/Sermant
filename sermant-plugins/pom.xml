@@ -34,8 +34,11 @@
                 <module>sermant-service-registry</module>
                 <module>sermant-dynamic-config</module>
                 <module>sermant-router</module>
-                <module>sermant-monitor</module>
                 <module>sermant-loadbalancer</module>
+                <module>sermant-springboot-registry</module>
+                <module>sermant-mq-consume-deny</module>
+                <module>sermant-monitor</module>
+                <module>sermant-service-visibility</module>
             </modules>
             <build>
                 <pluginManagement>
@@ -54,58 +57,17 @@
             </build>
         </profile>
         <profile>
-            <id>example</id>
-            <modules>
-                <module>sermant-service-registry</module>
-            </modules>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-shade-plugin</artifactId>
-                            <configuration>
-                                <outputFile>
-                                    ${package.output.dir}/${project.artifactId}-${project.version}.jar
-                                </outputFile>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-        <profile>
-            <id>ext</id>
+            <id>test</id>
             <modules>
                 <module>sermant-flowcontrol</module>
-            </modules>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-shade-plugin</artifactId>
-                            <configuration>
-                                <outputFile>
-                                    ${package.output.dir}/${project.artifactId}-${project.version}.jar
-                                </outputFile>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-        <profile>
-            <id>all</id>
-            <modules>
-                <module>sermant-flowcontrol</module>
-                <module>sermant-server-monitor</module>
                 <module>sermant-router</module>
-                <module>sermant-threadlocal</module>
                 <module>sermant-service-registry</module>
-                <module>sermant-luban-adaptor</module>
                 <module>sermant-loadbalancer</module>
                 <module>sermant-dynamic-config</module>
+                <module>sermant-monitor</module>
+                <module>sermant-springboot-registry</module>
+                <module>sermant-mq-consume-deny</module>
+                <module>sermant-service-visibility</module>
             </modules>
             <build>
                 <pluginManagement>
@@ -131,6 +93,10 @@
                 <module>sermant-dynamic-config</module>
                 <module>sermant-router</module>
                 <module>sermant-loadbalancer</module>
+                <module>sermant-monitor</module>
+                <module>sermant-springboot-registry</module>
+                <module>sermant-mq-consume-deny</module>
+                <module>sermant-service-visibility</module>
             </modules>
         </profile>
     </profiles>

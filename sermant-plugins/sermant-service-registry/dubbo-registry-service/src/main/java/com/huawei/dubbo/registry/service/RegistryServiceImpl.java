@@ -29,6 +29,7 @@ import com.huawei.dubbo.registry.utils.CollectionUtils;
 import com.huawei.dubbo.registry.utils.ReflectUtils;
 import com.huawei.registry.config.ConfigConstants;
 import com.huawei.registry.config.RegisterConfig;
+import com.huawei.registry.config.RegisterServiceCommonConfig;
 
 import com.huaweicloud.sermant.core.common.LoggerFactory;
 import com.huaweicloud.sermant.core.config.ConfigManager;
@@ -115,12 +116,14 @@ public class RegistryServiceImpl implements RegistryService {
     private static final String CONSUMER_PROTOCOL_PREFIX = "consumer";
     private static final String GROUP_KEY = "group";
     private static final String VERSION_KEY = "version";
+    private static final String ZONE_KEY = "zone";
     private static final String SERVICE_NAME_KEY = "service.name";
     private static final String INTERFACE_KEY = "interface";
     private static final String INTERFACE_DATA_KEY = "dubbo.interface.data";
     private static final String WILDCARD = "*";
     private static final String META_DATA_PREFIX = "service.meta.parameters.";
     private static final String META_DATA_VERSION_KEY = "service.meta.version";
+    private static final String META_DATA_ZONE_KEY = "service.meta.zone";
     private static final List<String> IGNORE_REGISTRY_KEYS = Arrays.asList(GROUP_KEY, VERSION_KEY, SERVICE_NAME_KEY);
     private static final List<String> DEFAULT_INTERFACE_KEYS = Collections.singletonList("dubbo.tag");
 
@@ -135,6 +138,7 @@ public class RegistryServiceImpl implements RegistryService {
     private RegisterConfig config;
     private GovernanceService governanceService;
     private ServiceMeta serviceMeta;
+    private RegisterServiceCommonConfig commonConfig;
 
     @Override
     public void startRegistration() {
@@ -143,10 +147,12 @@ public class RegistryServiceImpl implements RegistryService {
             return;
         }
         config = PluginConfigManager.getPluginConfig(RegisterConfig.class);
+        commonConfig = PluginConfigManager.getPluginConfig(RegisterServiceCommonConfig.class);
         serviceMeta = ConfigManager.getConfig(ServiceMeta.class);
         governanceService = ServiceManager.getService(GovernanceService.class);
-        client = new ServiceCenterClient(new AddressManager(config.getProject(), config.getAddressList(), EVENT_BUS),
-            createSslProperties(), new DefaultRequestAuthHeaderProvider(), DEFAULT_TENANT_NAME, Collections.emptyMap());
+        client = new ServiceCenterClient(new AddressManager(config.getProject(), commonConfig.getAddressList(),
+            EVENT_BUS), createSslProperties(), new DefaultRequestAuthHeaderProvider(), DEFAULT_TENANT_NAME,
+            Collections.emptyMap());
         ignoreKeys = new ArrayList<>();
         ignoreKeys.addAll(IGNORE_REGISTRY_KEYS);
         ignoreKeys.addAll(DEFAULT_INTERFACE_KEYS);
@@ -255,14 +261,7 @@ public class RegistryServiceImpl implements RegistryService {
     public void onMicroserviceRegistrationEvent(MicroserviceRegistrationEvent event) {
         isRegistrationInProgress = true;
         if (event.isSuccess()) {
-            if (serviceCenterDiscovery == null) {
-                serviceCenterDiscovery = new ServiceCenterDiscovery(client, EVENT_BUS);
-                serviceCenterDiscovery.updateMyselfServiceId(microservice.getServiceId());
-                serviceCenterDiscovery.setPollInterval(config.getPullInterval());
-                serviceCenterDiscovery.startDiscovery();
-            } else {
-                serviceCenterDiscovery.updateMyselfServiceId(microservice.getServiceId());
-            }
+            initServiceCenterDiscovery();
         }
     }
 
@@ -275,6 +274,7 @@ public class RegistryServiceImpl implements RegistryService {
     public void onMicroserviceInstanceRegistrationEvent(MicroserviceInstanceRegistrationEvent event) {
         isRegistrationInProgress = true;
         if (event.isSuccess()) {
+            initServiceCenterDiscovery();
             updateInterfaceMap();
             FIRST_REGISTRATION_WAITER.countDown();
         }
@@ -288,6 +288,17 @@ public class RegistryServiceImpl implements RegistryService {
     @Subscribe
     public void onInstanceChangedEvent(InstanceChangedEvent event) {
         notify(event.getAppName(), event.getServiceName(), event.getInstances());
+    }
+
+    private void initServiceCenterDiscovery() {
+        if (serviceCenterDiscovery == null) {
+            serviceCenterDiscovery = new ServiceCenterDiscovery(client, EVENT_BUS);
+            serviceCenterDiscovery.updateMyselfServiceId(microservice.getServiceId());
+            serviceCenterDiscovery.setPollInterval(config.getPullInterval());
+            serviceCenterDiscovery.startDiscovery();
+        } else {
+            serviceCenterDiscovery.updateMyselfServiceId(microservice.getServiceId());
+        }
     }
 
     private SSLProperties createSslProperties() {
@@ -372,8 +383,14 @@ public class RegistryServiceImpl implements RegistryService {
         properties.put(INTERFACE_DATA_KEY, JSONObject.toJSONString(map));
 
         // 存入实例参数
-        Optional.ofNullable(serviceMeta.getParameters()).ifPresent(properties::putAll);
+        if (!CollectionUtils.isEmpty(serviceMeta.getParameters())) {
+            // 由于http header的key不区分大小写，所以使用metadata做路由时，统一把key转为小写
+            // 由于dubbo注册时，会把'-'替换成'.'，所以保持一致
+            serviceMeta.getParameters()
+                .forEach((key, value) -> properties.put(key.replace("-", ".").toLowerCase(Locale.ROOT), value));
+        }
         properties.put(VERSION_KEY, config.getVersion());
+        properties.put(ZONE_KEY, serviceMeta.getZone());
         return properties;
     }
 
@@ -440,7 +457,8 @@ public class RegistryServiceImpl implements RegistryService {
         Map<String, String> parameters = ReflectUtils.getParameters(url);
         parameters.keySet().forEach(key -> {
             // 实例属性，会存到properties中，所以不需要在接口级参数中储存
-            if (key.startsWith(META_DATA_PREFIX) || META_DATA_VERSION_KEY.equals(key)) {
+            if (key.startsWith(META_DATA_PREFIX) || META_DATA_VERSION_KEY.equals(key) || META_DATA_ZONE_KEY
+                .equals(key)) {
                 ignoreKeys.add(key);
             }
         });
@@ -680,6 +698,10 @@ public class RegistryServiceImpl implements RegistryService {
             }
             if (VERSION_KEY.equals(key)) {
                 metaData.put(META_DATA_VERSION_KEY, entry.getValue());
+                continue;
+            }
+            if (ZONE_KEY.equals(key)) {
+                metaData.put(META_DATA_ZONE_KEY, entry.getValue());
                 continue;
             }
             metaData.put(META_DATA_PREFIX + key, entry.getValue());

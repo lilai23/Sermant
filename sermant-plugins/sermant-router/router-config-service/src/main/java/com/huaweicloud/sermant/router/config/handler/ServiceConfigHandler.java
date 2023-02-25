@@ -16,23 +16,22 @@
 
 package com.huaweicloud.sermant.router.config.handler;
 
-import com.huaweicloud.sermant.core.plugin.subscribe.processor.OrderConfigEvent;
 import com.huaweicloud.sermant.core.service.dynamicconfig.common.DynamicConfigEvent;
 import com.huaweicloud.sermant.core.service.dynamicconfig.common.DynamicConfigEventType;
+import com.huaweicloud.sermant.core.utils.StringUtils;
 import com.huaweicloud.sermant.router.common.constants.RouterConstant;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
-import com.huaweicloud.sermant.router.config.label.entity.RouterConfiguration;
-import com.huaweicloud.sermant.router.config.label.entity.Rule;
+import com.huaweicloud.sermant.router.config.cache.ConfigCache;
+import com.huaweicloud.sermant.router.config.entity.RouterConfiguration;
+import com.huaweicloud.sermant.router.config.entity.Rule;
 import com.huaweicloud.sermant.router.config.utils.RuleUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * 路由配置处理器（服务维度）
@@ -41,52 +40,39 @@ import java.util.Map.Entry;
  * @since 2022-08-09
  */
 public class ServiceConfigHandler extends AbstractConfigHandler {
+    private static final String POINT = ".";
+
     @Override
-    public void handle(DynamicConfigEvent event, RouterConfiguration configuration) {
+    public void handle(DynamicConfigEvent event, String cacheName) {
+        RouterConfiguration configuration = ConfigCache.getLabel(cacheName);
         String serviceName = event.getKey().substring(RouterConstant.ROUTER_KEY_PREFIX.length() + 1);
         if (event.getEventType() == DynamicConfigEventType.DELETE) {
             configuration.getRouteRule().remove(serviceName);
-            RuleUtils.updateHeaderKeys(serviceName, Collections.emptyList());
+            RuleUtils.updateMatchKeys(serviceName, Collections.emptyList());
             return;
         }
         List<Rule> list = JSONArray.parseArray(JSONObject.toJSONString(getRule(event, serviceName)), Rule.class);
+        RuleUtils.removeInvalidRules(list);
         if (CollectionUtils.isEmpty(list)) {
             configuration.getRouteRule().remove(serviceName);
-            return;
+        } else {
+            list.sort((o1, o2) -> o2.getPrecedence() - o1.getPrecedence());
+            configuration.getRouteRule().put(serviceName, list);
         }
-        for (Rule rule : list) {
-            // 去掉无效的规则
-            RuleUtils.removeInvalidRules(rule.getMatch());
+        RuleUtils.updateMatchKeys(serviceName, list);
+    }
 
-            // 无attachments规则，将headers规则更新到attachments规则
-            RuleUtils.setAttachmentsByHeaders(rule.getMatch());
-
-            // 去掉无效的路由
-            RuleUtils.removeInvalidRoute(rule.getRoute());
-        }
-        list.sort((o1, o2) -> o2.getPrecedence() - o1.getPrecedence());
-        configuration.getRouteRule().put(serviceName, list);
-        RuleUtils.updateHeaderKeys(serviceName, list);
+    @Override
+    public boolean shouldHandle(String key) {
+        return key.startsWith(RouterConstant.ROUTER_KEY_PREFIX + POINT);
     }
 
     private List<Map<String, Object>> getRule(DynamicConfigEvent event, String serviceName) {
-        if (event instanceof OrderConfigEvent) {
-            Map<String, Object> allData = ((OrderConfigEvent) event).getAllData();
-            Map<String, List<Map<String, Object>>> routeRuleMap = new HashMap<>();
-            for (Entry<String, Object> entry : allData.entrySet()) {
-                String key = entry.getKey();
-                if (!key.startsWith(RouterConstant.ROUTER_KEY_PREFIX + ".")) {
-                    continue;
-                }
-                Object value = entry.getValue();
-                if (value instanceof String) {
-                    routeRuleMap.put(entry.getKey(), yaml.loadAs((String) value, List.class));
-                } else {
-                    routeRuleMap.put(entry.getKey(), (List<Map<String, Object>>) value);
-                }
-            }
-            return routeRuleMap.get(RouterConstant.ROUTER_KEY_PREFIX + "." + serviceName);
+        String content = event.getContent();
+        if (StringUtils.isBlank(content)) {
+            return Collections.emptyList();
         }
-        return yaml.loadAs(event.getContent(), List.class);
+        Map<String, List<Map<String, Object>>> map = yaml.load(content);
+        return map.get(RouterConstant.ROUTER_KEY_PREFIX + POINT + serviceName);
     }
 }
