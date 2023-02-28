@@ -29,9 +29,9 @@ import com.netflix.zuul.context.RequestContext;
  * @author provenceee
  * @since 2023-02-21
  */
-public class ZuulServletFilterInterceptor extends AbstractInterceptor {
+public class ZuulServletInterceptor extends AbstractInterceptor {
     @Override
-    public ExecuteContext before(ExecuteContext context) throws Exception {
+    public ExecuteContext before(ExecuteContext context) {
         RequestTag requestTag = ThreadLocalUtils.getRequestTag();
         if (requestTag != null) {
             requestTag.getTag().forEach((key, value) ->
@@ -41,7 +41,7 @@ public class ZuulServletFilterInterceptor extends AbstractInterceptor {
     }
 
     @Override
-    public ExecuteContext after(ExecuteContext context) throws Exception {
+    public ExecuteContext after(ExecuteContext context) {
         return context;
     }
 }

@@ -16,6 +16,7 @@
 
 package com.huaweicloud.sermant.router.spring.handler;
 
+import com.huaweicloud.sermant.router.common.constants.RouterConstant;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 
 import java.util.Collections;
@@ -30,8 +31,6 @@ import java.util.Set;
  * @since 2023-02-21
  */
 public class RouteMappingHandler extends AbstractMappingHandler {
-    private static final int ORDER = 200;
-
     /**
      * 获取透传的标记
      *
@@ -53,6 +52,6 @@ public class RouteMappingHandler extends AbstractMappingHandler {
 
     @Override
     public int getOrder() {
-        return ORDER;
+        return RouterConstant.ROUTER_HANDLER_ORDER;
     }
 }

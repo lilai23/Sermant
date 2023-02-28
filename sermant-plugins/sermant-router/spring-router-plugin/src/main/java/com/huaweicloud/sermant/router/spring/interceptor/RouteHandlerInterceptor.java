@@ -17,9 +17,11 @@
 package com.huaweicloud.sermant.router.spring.interceptor;
 
 import com.huaweicloud.sermant.core.service.ServiceManager;
+import com.huaweicloud.sermant.router.common.handler.Handler;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 import com.huaweicloud.sermant.router.common.utils.ThreadLocalUtils;
 import com.huaweicloud.sermant.router.spring.handler.AbstractInterceptorHandler;
+import com.huaweicloud.sermant.router.spring.handler.AbstractInterceptorHandler.Keys;
 import com.huaweicloud.sermant.router.spring.handler.LaneInterceptorHandler;
 import com.huaweicloud.sermant.router.spring.handler.RouteInterceptorHandler;
 import com.huaweicloud.sermant.router.spring.service.SpringConfigService;
@@ -47,6 +49,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class RouteHandlerInterceptor implements HandlerInterceptor {
     private final List<AbstractInterceptorHandler> handlers;
+
     private final SpringConfigService configService;
 
     /**
@@ -57,7 +60,7 @@ public class RouteHandlerInterceptor implements HandlerInterceptor {
         handlers = new ArrayList<>();
         handlers.add(new LaneInterceptorHandler());
         handlers.add(new RouteInterceptorHandler());
-        handlers.sort(Comparator.comparingInt(AbstractInterceptorHandler::getOrder));
+        handlers.sort(Comparator.comparingInt(Handler::getOrder));
     }
 
     @Override
@@ -73,7 +76,7 @@ public class RouteHandlerInterceptor implements HandlerInterceptor {
         String path = request.getRequestURI();
         String method = request.getMethod();
         handlers.forEach(handler -> ThreadLocalUtils
-            .addRequestTag(handler.getRequestTag(path, method, headers, parameterMap)));
+            .addRequestTag(handler.getRequestTag(path, method, headers, parameterMap, new Keys(matchKeys, matchTags))));
         return true;
     }
 

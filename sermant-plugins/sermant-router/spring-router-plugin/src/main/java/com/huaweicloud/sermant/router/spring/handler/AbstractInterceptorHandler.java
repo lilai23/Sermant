@@ -18,6 +18,7 @@ package com.huaweicloud.sermant.router.spring.handler;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * web拦截器处理器
@@ -33,8 +34,40 @@ public abstract class AbstractInterceptorHandler extends AbstractHandler {
      * @param methodName http方法
      * @param headers http请求头
      * @param parameters url参数
+     * @param keys 透传标记key
      * @return 透传的标记
      */
     public abstract Map<String, List<String>> getRequestTag(String path, String methodName,
-        Map<String, List<String>> headers, Map<String, String[]> parameters);
+        Map<String, List<String>> headers, Map<String, String[]> parameters, Keys keys);
+
+    /**
+     * 透传标记key实体
+     *
+     * @author provenceee
+     * @since 2023-02-21
+     */
+    public static class Keys {
+        private final Set<String> matchKeys;
+
+        private final Set<String> matchTags;
+
+        /**
+         * 构造方法
+         *
+         * @param matchKeys 标签路由透传标记
+         * @param matchTags 泳道透传标记
+         */
+        public Keys(Set<String> matchKeys, Set<String> matchTags) {
+            this.matchKeys = matchKeys;
+            this.matchTags = matchTags;
+        }
+
+        public Set<String> getMatchKeys() {
+            return matchKeys;
+        }
+
+        public Set<String> getMatchTags() {
+            return matchTags;
+        }
+    }
 }

@@ -21,7 +21,6 @@ import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -87,9 +86,17 @@ public class RouterConfiguration {
      */
     public void removeServiceRule(String serviceName) {
         Map<String, List<Rule>> flowRules = rules.get(RouterConstant.FLOW_MATCH_KIND);
+        if (!CollectionUtils.isEmpty(flowRules)) {
+            flowRules.remove(serviceName);
+        }
         Map<String, List<Rule>> tagRules = rules.get(RouterConstant.TAG_MATCH_KIND);
-        flowRules.remove(serviceName);
-        tagRules.remove(serviceName);
+        if (!CollectionUtils.isEmpty(tagRules)) {
+            tagRules.remove(serviceName);
+        }
+        Map<String, List<Rule>> laneRules = rules.get(RouterConstant.LANE_MATCH_KIND);
+        if (!CollectionUtils.isEmpty(laneRules)) {
+            laneRules.remove(serviceName);
+        }
     }
 
     /**

@@ -17,8 +17,10 @@
 package com.huaweicloud.sermant.router.dubbo.handler;
 
 import com.huaweicloud.sermant.core.service.ServiceManager;
+import com.huaweicloud.sermant.router.common.constants.RouterConstant;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 import com.huaweicloud.sermant.router.dubbo.service.LaneContextFilterService;
+import com.huaweicloud.sermant.router.dubbo.utils.DubboReflectUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,8 +34,6 @@ import java.util.Set;
  * @since 2023-02-21
  */
 public class LaneContextFilterHandler extends AbstractContextFilterHandler {
-    private static final int ORDER = 100;
-
     private final LaneContextFilterService laneContextFilterService;
 
     /**
@@ -44,8 +44,7 @@ public class LaneContextFilterHandler extends AbstractContextFilterHandler {
     }
 
     @Override
-    public Map<String, List<String>> getRequestTag(String interfaceName, String methodName,
-        Map<String, Object> attachments, Object[] args) {
+    public Map<String, List<String>> getRequestTag(Object invoker, Object invocation) {
         Set<String> matchTags = configService.getMatchTags();
         if (CollectionUtils.isEmpty(matchTags)) {
             // 染色标记为空，代表没有染色规则，直接return
@@ -53,9 +52,13 @@ public class LaneContextFilterHandler extends AbstractContextFilterHandler {
         }
 
         // 上游透传的标记
+        Map<String, Object> attachments = DubboReflectUtils.getAttachments(invocation);
         Map<String, List<String>> requestTag = getRequestTag(attachments, matchTags);
 
         // 本次染色标记
+        String interfaceName = DubboReflectUtils.getServiceKey(DubboReflectUtils.getUrl(invoker));
+        String methodName = DubboReflectUtils.getMethodName(invocation);
+        Object[] args = DubboReflectUtils.getArguments(invocation);
         Map<String, List<String>> laneTag = laneContextFilterService
             .getLane(interfaceName, methodName, attachments, args);
         if (CollectionUtils.isEmpty(laneTag)) {
@@ -69,6 +72,6 @@ public class LaneContextFilterHandler extends AbstractContextFilterHandler {
 
     @Override
     public int getOrder() {
-        return ORDER;
+        return RouterConstant.LANE_HANDLER_ORDER;
     }
 }

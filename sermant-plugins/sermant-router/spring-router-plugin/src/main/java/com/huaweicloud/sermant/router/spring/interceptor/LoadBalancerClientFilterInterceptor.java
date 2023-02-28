@@ -40,10 +40,7 @@ public class LoadBalancerClientFilterInterceptor extends AbstractInterceptor {
             ServerWebExchange exchange = (ServerWebExchange) argument;
             HttpRequest request = exchange.getRequest();
             HttpHeaders headers = request.getHeaders();
-            RequestTag requestTag = ThreadLocalUtils.getRequestTag();
-            if (requestTag != null) {
-                requestTag.getTag().forEach(headers::putIfAbsent);
-            }
+            putHeaders(headers);
             String path = request.getURI().getPath();
             ThreadLocalUtils.setRequestData(new RequestData(headers, path, request.getMethod().name()));
         }
@@ -52,13 +49,23 @@ public class LoadBalancerClientFilterInterceptor extends AbstractInterceptor {
 
     @Override
     public ExecuteContext after(ExecuteContext context) {
+        ThreadLocalUtils.removeRequestTag();
         ThreadLocalUtils.removeRequestData();
         return context;
     }
 
     @Override
     public ExecuteContext onThrow(ExecuteContext context) {
+        ThreadLocalUtils.removeRequestTag();
         ThreadLocalUtils.removeRequestData();
         return context;
+    }
+
+    private void putHeaders(HttpHeaders readOnlyHttpHeaders) {
+        HttpHeaders httpHeaders = HttpHeaders.writableHttpHeaders(readOnlyHttpHeaders);
+        RequestTag requestTag = ThreadLocalUtils.getRequestTag();
+        if (requestTag != null) {
+            requestTag.getTag().forEach(httpHeaders::putIfAbsent);
+        }
     }
 }

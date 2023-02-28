@@ -101,6 +101,9 @@ public class RouterConstant {
      */
     public static final String TAG_MATCH_KIND = "routematcher.sermant.io/tag";
 
+    /**
+     * 染色规则的类型
+     */
     public static final String LANE_MATCH_KIND = "route.sermant.io/lane";
 
     /**
@@ -122,6 +125,16 @@ public class RouterConstant {
      * tag匹配方式在处理器责任链中的顺序
      */
     public static final int TAG_HANDLER_ORDER = 2;
+
+    /**
+     * 泳道处理器顺序
+     */
+    public static final int LANE_HANDLER_ORDER = 100;
+
+    /**
+     * 路由处理器顺序
+     */
+    public static final int ROUTER_HANDLER_ORDER = 200;
 
     private RouterConstant() {
     }

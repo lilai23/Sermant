@@ -18,6 +18,7 @@ package com.huaweicloud.sermant.router.spring.interceptor;
 
 import com.huaweicloud.sermant.core.plugin.agent.entity.ExecuteContext;
 import com.huaweicloud.sermant.core.plugin.agent.interceptor.AbstractInterceptor;
+import com.huaweicloud.sermant.router.common.handler.Handler;
 import com.huaweicloud.sermant.router.common.utils.ThreadLocalUtils;
 import com.huaweicloud.sermant.router.spring.handler.AbstractMappingHandler;
 import com.huaweicloud.sermant.router.spring.handler.LaneMappingHandler;
@@ -25,7 +26,6 @@ import com.huaweicloud.sermant.router.spring.handler.RouteMappingHandler;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 
 import java.util.ArrayList;
@@ -40,6 +40,9 @@ import java.util.Map;
  * @since 2022-10-10
  */
 public class AbstractHandlerMappingInterceptor extends AbstractInterceptor {
+    private static final String EXCEPT_CLASS_NAME
+        = "org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping";
+
     private final List<AbstractMappingHandler> handlers;
 
     /**
@@ -49,7 +52,7 @@ public class AbstractHandlerMappingInterceptor extends AbstractInterceptor {
         handlers = new ArrayList<>();
         handlers.add(new LaneMappingHandler());
         handlers.add(new RouteMappingHandler());
-        handlers.sort(Comparator.comparingInt(AbstractMappingHandler::getOrder));
+        handlers.sort(Comparator.comparingInt(Handler::getOrder));
     }
 
     @Override
@@ -84,6 +87,6 @@ public class AbstractHandlerMappingInterceptor extends AbstractInterceptor {
     private boolean shouldHandle(ExecuteContext context) {
         Object[] arguments = context.getArguments();
         return arguments.length > 0 && arguments[0] instanceof ServerWebExchange
-            && context.getObject() instanceof RequestMappingHandlerMapping;
+            && EXCEPT_CLASS_NAME.equals(context.getObject().getClass().getName());
     }
 }

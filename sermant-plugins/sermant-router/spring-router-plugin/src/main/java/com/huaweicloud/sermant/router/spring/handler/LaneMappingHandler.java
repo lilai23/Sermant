@@ -17,6 +17,7 @@
 package com.huaweicloud.sermant.router.spring.handler;
 
 import com.huaweicloud.sermant.core.service.ServiceManager;
+import com.huaweicloud.sermant.router.common.constants.RouterConstant;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 import com.huaweicloud.sermant.router.spring.service.LaneService;
 
@@ -32,8 +33,6 @@ import java.util.Set;
  * @since 2023-02-21
  */
 public class LaneMappingHandler extends AbstractMappingHandler {
-    private static final int ORDER = 100;
-
     private final LaneService laneService;
 
     /**
@@ -77,6 +76,6 @@ public class LaneMappingHandler extends AbstractMappingHandler {
 
     @Override
     public int getOrder() {
-        return ORDER;
+        return RouterConstant.LANE_HANDLER_ORDER;
     }
 }

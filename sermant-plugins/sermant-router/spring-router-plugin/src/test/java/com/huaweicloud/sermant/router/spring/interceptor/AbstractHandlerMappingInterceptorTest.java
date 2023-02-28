@@ -20,6 +20,7 @@ import com.huaweicloud.sermant.core.plugin.agent.entity.ExecuteContext;
 import com.huaweicloud.sermant.core.service.ServiceManager;
 import com.huaweicloud.sermant.router.common.request.RequestTag;
 import com.huaweicloud.sermant.router.common.utils.ThreadLocalUtils;
+import com.huaweicloud.sermant.router.spring.TestSpringConfigService;
 import com.huaweicloud.sermant.router.spring.service.SpringConfigService;
 
 import org.junit.AfterClass;
@@ -34,10 +35,8 @@ import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 测试AbstractHandlerMappingInterceptor
@@ -58,28 +57,10 @@ public class AbstractHandlerMappingInterceptorTest {
     @BeforeClass
     public static void before() {
         mockServiceManager = Mockito.mockStatic(ServiceManager.class);
+        TestSpringConfigService configService = new TestSpringConfigService();
+        configService.setReturnEmptyWhenGetMatchTags(true);
         mockServiceManager.when(() -> ServiceManager.getService(SpringConfigService.class))
-            .thenReturn(new SpringConfigService() {
-                @Override
-                public void init(String cacheName, String serviceName) {
-                }
-
-                @Override
-                public Set<String> getMatchKeys() {
-                    Set<String> keys = new HashSet<>();
-                    keys.add("bar");
-                    keys.add("foo");
-                    return keys;
-                }
-
-                @Override
-                public Set<String> getMatchTags() {
-                    Set<String> keys = new HashSet<>();
-                    keys.add("bar");
-                    keys.add("foo");
-                    return keys;
-                }
-            });
+            .thenReturn(configService);
     }
 
     /**
@@ -129,7 +110,8 @@ public class AbstractHandlerMappingInterceptorTest {
      */
     @Test
     public void testAfter() {
-        ThreadLocalUtils.addRequestTag(Collections.emptyMap());
+        ThreadLocalUtils.addRequestTag(Collections.singletonMap("bar", Collections.singletonList("foo")));
+        Assert.assertNotNull(ThreadLocalUtils.getRequestTag());
 
         // 测试after方法,不释放线程变量
         interceptor.after(context);
@@ -141,7 +123,8 @@ public class AbstractHandlerMappingInterceptorTest {
      */
     @Test
     public void testOnThrow() {
-        ThreadLocalUtils.addRequestTag(Collections.emptyMap());
+        ThreadLocalUtils.addRequestTag(Collections.singletonMap("bar", Collections.singletonList("foo")));
+        Assert.assertNotNull(ThreadLocalUtils.getRequestTag());
 
         // 测试onThrow方法,验证是否释放线程变量
         interceptor.onThrow(context);

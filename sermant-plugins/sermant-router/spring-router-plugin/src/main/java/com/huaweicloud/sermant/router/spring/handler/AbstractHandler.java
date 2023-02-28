@@ -16,9 +16,7 @@
 
 package com.huaweicloud.sermant.router.spring.handler;
 
-import com.huaweicloud.sermant.core.service.ServiceManager;
 import com.huaweicloud.sermant.router.common.handler.Handler;
-import com.huaweicloud.sermant.router.spring.service.SpringConfigService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,19 +30,10 @@ import java.util.Set;
  * @since 2023-02-21
  */
 public abstract class AbstractHandler implements Handler {
-    protected final SpringConfigService configService;
-
-    /**
-     * 构造方法
-     */
-    public AbstractHandler() {
-        configService = ServiceManager.getService(SpringConfigService.class);
-    }
-
     /**
      * 从headers中，获取需要透传的请求标记
      *
-     * @param headers http请求太
+     * @param headers http请求头
      * @param keys 需要获取的标记的key
      * @return 请求标记
      */

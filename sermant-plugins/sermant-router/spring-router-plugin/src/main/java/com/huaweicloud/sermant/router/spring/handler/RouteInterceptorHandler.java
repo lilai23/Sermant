@@ -16,6 +16,7 @@
 
 package com.huaweicloud.sermant.router.spring.handler;
 
+import com.huaweicloud.sermant.router.common.constants.RouterConstant;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 
 import java.util.Collections;
@@ -30,8 +31,6 @@ import java.util.Set;
  * @since 2023-02-21
  */
 public class RouteInterceptorHandler extends AbstractInterceptorHandler {
-    private static final int ORDER = 200;
-
     /**
      * 获取透传的标记
      *
@@ -39,8 +38,8 @@ public class RouteInterceptorHandler extends AbstractInterceptorHandler {
      */
     @Override
     public Map<String, List<String>> getRequestTag(String path, String methodName, Map<String, List<String>> headers,
-        Map<String, String[]> parameters) {
-        Set<String> matchKeys = configService.getMatchKeys();
+        Map<String, String[]> parameters, Keys keys) {
+        Set<String> matchKeys = keys.getMatchKeys();
         if (CollectionUtils.isEmpty(matchKeys)) {
             return Collections.emptyMap();
         }
@@ -49,6 +48,6 @@ public class RouteInterceptorHandler extends AbstractInterceptorHandler {
 
     @Override
     public int getOrder() {
-        return ORDER;
+        return RouterConstant.ROUTER_HANDLER_ORDER;
     }
 }

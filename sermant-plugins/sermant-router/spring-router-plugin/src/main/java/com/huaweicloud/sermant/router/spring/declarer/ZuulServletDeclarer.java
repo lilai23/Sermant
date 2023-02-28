@@ -19,23 +19,23 @@ package com.huaweicloud.sermant.router.spring.declarer;
 import com.huaweicloud.sermant.core.plugin.agent.matcher.ClassMatcher;
 
 /**
- * ZuulServletFilter增强类，设置请求头
+ * ZuulServlet增强类，设置请求头
  *
  * @author provenceee
  * @since 2023-02-21
  */
-public class ZuulServletFilterDeclarer extends AbstractDeclarer {
-    private static final String ENHANCE_CLASS = "org.springframework.cloud.netflix.zuul.ZuulServletFilter";
+public class ZuulServletDeclarer extends AbstractDeclarer {
+    private static final String ENHANCE_CLASS = "com.netflix.zuul.http.ZuulServlet";
 
     private static final String INTERCEPT_CLASS
-        = "com.huaweicloud.sermant.router.spring.interceptor.ZuulServletFilterInterceptor";
+        = "com.huaweicloud.sermant.router.spring.interceptor.ZuulServletInterceptor";
 
-    private static final String METHOD_NAME = "doFilter";
+    private static final String METHOD_NAME = "service";
 
     /**
      * 构造方法
      */
-    public ZuulServletFilterDeclarer() {
+    public ZuulServletDeclarer() {
         super(ENHANCE_CLASS, INTERCEPT_CLASS, METHOD_NAME);
     }
 

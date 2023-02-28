@@ -17,6 +17,7 @@
 package com.huaweicloud.sermant.router.spring.handler;
 
 import com.huaweicloud.sermant.core.service.ServiceManager;
+import com.huaweicloud.sermant.router.common.constants.RouterConstant;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 import com.huaweicloud.sermant.router.spring.service.LaneService;
 
@@ -32,8 +33,6 @@ import java.util.Set;
  * @since 2023-02-21
  */
 public class LaneInterceptorHandler extends AbstractInterceptorHandler {
-    private static final int ORDER = 100;
-
     private final LaneService laneService;
 
     /**
@@ -50,8 +49,8 @@ public class LaneInterceptorHandler extends AbstractInterceptorHandler {
      */
     @Override
     public Map<String, List<String>> getRequestTag(String path, String methodName, Map<String, List<String>> headers,
-        Map<String, String[]> parameters) {
-        Set<String> matchTags = configService.getMatchTags();
+        Map<String, String[]> parameters, Keys keys) {
+        Set<String> matchTags = keys.getMatchTags();
         if (CollectionUtils.isEmpty(matchTags)) {
             // 染色标记为空，代表没有染色规则，直接return
             return Collections.emptyMap();
@@ -73,6 +72,6 @@ public class LaneInterceptorHandler extends AbstractInterceptorHandler {
 
     @Override
     public int getOrder() {
-        return ORDER;
+        return RouterConstant.LANE_HANDLER_ORDER;
     }
 }

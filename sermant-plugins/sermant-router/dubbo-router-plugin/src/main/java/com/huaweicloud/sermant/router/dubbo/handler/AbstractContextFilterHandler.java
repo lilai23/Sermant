@@ -46,14 +46,15 @@ public abstract class AbstractContextFilterHandler implements Handler {
     /**
      * 获取透传标记
      *
-     * @param interfaceName 接口名
-     * @param methodName 方法名
-     * @param attachments attachments
-     * @param args 接口参数
+     * @param invoker invoker
+     * @param invocation invocation
      * @return 泳道标记
+     * @see com.alibaba.dubbo.rpc.Invoker
+     * @see org.apache.dubbo.rpc.Invoker
+     * @see com.alibaba.dubbo.rpc.Invocation
+     * @see org.apache.dubbo.rpc.Invocation
      */
-    public abstract Map<String, List<String>> getRequestTag(String interfaceName, String methodName,
-        Map<String, Object> attachments, Object[] args);
+    public abstract Map<String, List<String>> getRequestTag(Object invoker, Object invocation);
 
     /**
      * 从attachments中，获取需要透传的请求标记

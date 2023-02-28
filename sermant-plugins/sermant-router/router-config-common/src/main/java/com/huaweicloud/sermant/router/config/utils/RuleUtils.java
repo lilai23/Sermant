@@ -370,7 +370,7 @@ public class RuleUtils {
             }
             String matchPath = match.getPath();
             if (StringUtils.isExist(matchPath)) {
-                if (!matchPath.equals(path) || !isPatternMatches(matchPath, path)) {
+                if (!matchPath.equals(path) && !isPatternMatches(matchPath, path)) {
                     return false;
                 }
             }
