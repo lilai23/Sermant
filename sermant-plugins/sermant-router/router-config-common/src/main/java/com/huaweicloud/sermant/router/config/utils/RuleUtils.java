@@ -502,7 +502,19 @@ public class RuleUtils {
                 if (!RouterConstant.CONSUMER_TAG.equals(tags.get(key))) {
                     return true;
                 }
-                tags.put(key, routerConfig.getParameters().get(key));
+                if("version".equals(key)) {
+                    tags.put(key, routerConfig.getRouterVersion());
+                    continue;
+                }
+                if("zone".equals(key)) {
+                    tags.put(key, routerConfig.getZone());
+                    continue;
+                }
+                Map<String, String> parameters = routerConfig.getParameters();
+                if(CollectionUtils.isEmpty(parameters)) {
+                    return true;
+                }
+                tags.put(key, parameters.get(key));
             }
             route.setWeight(ONO_HUNDRED);
             return false;
