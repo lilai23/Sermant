@@ -65,7 +65,7 @@ public class FlowRouteHandler extends AbstractRouteHandler {
         }
 
         // 所有实例都含有version，所以不能存入null值
-        allMismatchTags.remove(RouterConstant.VERSION_KEY);
+        allMismatchTags.remove(VERSION_KEY);
     }
 
     @Override

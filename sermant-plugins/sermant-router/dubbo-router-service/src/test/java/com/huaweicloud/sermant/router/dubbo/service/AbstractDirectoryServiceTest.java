@@ -156,6 +156,7 @@ public class AbstractDirectoryServiceTest {
         targetInvokers = (List<Object>) service.selectInvokers(testObject, arguments, invokers);
         Assert.assertEquals(invokers, targetInvokers);
         Assert.assertEquals(2, targetInvokers.size());
+        ConfigCache.getLabel(RouterConstant.DUBBO_CACHE_NAME).resetRouteRule(Collections.emptyMap());
     }
 
     /**
