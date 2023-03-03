@@ -40,7 +40,8 @@ public interface RouteHandler {
      * @see com.alibaba.dubbo.rpc.Invoker
      * @see org.apache.dubbo.rpc.Invocation
      */
-    Object handle(String targetService, List<Object> invokers, Object invocation, Map<String, String> queryMap, String serviceInterface);
+    Object handle(String targetService, List<Object> invokers, Object invocation, Map<String, String> queryMap,
+                  String serviceInterface);
 
     /**
      * 处理器的优先级

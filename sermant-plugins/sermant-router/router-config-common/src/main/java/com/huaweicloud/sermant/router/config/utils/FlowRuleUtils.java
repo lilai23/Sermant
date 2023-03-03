@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
  * @author lilai
  * @since 2023-02-21
  */
-public class FlowRuleUtils extends RuleUtils {
+public class FlowRuleUtils {
     /**
      * 获取目标规则
      *
@@ -53,17 +53,17 @@ public class FlowRuleUtils extends RuleUtils {
         }
 
         List<Rule> rules = Optional.ofNullable(
-                        Optional.ofNullable(
-                                        Optional.ofNullable(configuration.getRouteRule())
-                                                .orElseGet(Collections::emptyMap)
-                                                .get(RouterConstant.FLOW_MATCH_KIND))
-                                .orElseGet(Collections::emptyMap)
-                                .get(targetService))
-                .orElseGet(Collections::emptyList);
+                Optional.ofNullable(
+                        Optional.ofNullable(configuration.getRouteRule())
+                            .orElseGet(Collections::emptyMap)
+                            .get(RouterConstant.FLOW_MATCH_KIND))
+                    .orElseGet(Collections::emptyMap)
+                    .get(targetService))
+            .orElseGet(Collections::emptyList);
         if (CollectionUtils.isEmpty(rules)) {
             rules = Optional.ofNullable(
-                    Optional.ofNullable(configuration.getGlobalRule()).orElseGet(Collections::emptyMap)
-                            .get(RouterConstant.FLOW_MATCH_KIND)).orElseGet(Collections::emptyList);
+                Optional.ofNullable(configuration.getGlobalRule()).orElseGet(Collections::emptyMap)
+                    .get(RouterConstant.FLOW_MATCH_KIND)).orElseGet(Collections::emptyList);
         }
 
         if (CollectionUtils.isEmpty(rules)) {

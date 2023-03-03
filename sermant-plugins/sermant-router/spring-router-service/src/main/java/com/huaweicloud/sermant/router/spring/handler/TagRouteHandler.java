@@ -46,7 +46,7 @@ public class TagRouteHandler extends AbstractRouteHandler {
     /**
      * 构造方法
      */
-    public TagRouteHandler(){
+    public TagRouteHandler() {
     }
 
     @Override

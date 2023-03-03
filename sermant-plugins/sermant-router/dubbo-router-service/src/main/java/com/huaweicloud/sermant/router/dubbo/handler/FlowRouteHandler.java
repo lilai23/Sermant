@@ -75,7 +75,8 @@ public class FlowRouteHandler extends AbstractRouteHandler {
     }
 
     @Override
-    public Object handle(String targetService, List<Object> invokers, Object invocation, Map<String, String> queryMap, String serviceInterface) {
+    public Object handle(String targetService, List<Object> invokers, Object invocation, Map<String, String> queryMap,
+                         String serviceInterface) {
         if (!shouldHandle(invokers)) {
             return invokers;
         }
@@ -94,7 +95,8 @@ public class FlowRouteHandler extends AbstractRouteHandler {
     }
 
     private List<Object> getTargetInvokersByRules(List<Object> invokers, Object invocation,
-                                                  Map<String, String> queryMap, String targetService, String serviceInterface) {
+                                                  Map<String, String> queryMap, String targetService,
+                                                  String serviceInterface) {
         RouterConfiguration configuration = ConfigCache.getLabel(RouterConstant.DUBBO_CACHE_NAME);
         if (RouterConfiguration.isInValid(configuration)) {
             return invokers;
@@ -103,7 +105,7 @@ public class FlowRouteHandler extends AbstractRouteHandler {
                 + DubboReflectUtils.getMethodName(invocation) + ":" + getVersion(queryMap);
         List<Rule> rules = FlowRuleUtils
                 .getFlowRules(configuration, targetService, interfaceName, DubboCache.INSTANCE.getAppName());
-        if(CollectionUtils.isEmpty(rules)) {
+        if (CollectionUtils.isEmpty(rules)) {
             return invokers;
         }
         List<Route> routes = getRoutes(rules, DubboReflectUtils.getArguments(invocation),

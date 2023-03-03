@@ -29,7 +29,8 @@ public abstract class AbstractRouteHandler implements RouteHandler, Comparable<A
     private AbstractRouteHandler next;
 
     @Override
-    public Object handle(String targetService, List<Object> invokers, Object invocation, Map<String, String> queryMap, String serviceInterface) {
+    public Object handle(String targetService, List<Object> invokers, Object invocation, Map<String, String> queryMap,
+                         String serviceInterface) {
         if (next != null) {
             return next.handle(targetService, invokers, invocation, queryMap, serviceInterface);
         }

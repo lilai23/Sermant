@@ -64,7 +64,7 @@ public class FlowRouteHandlerTest {
         config.setRequestTags(Arrays.asList("foo", "bar", "version"));
         mockPluginConfigManager = Mockito.mockStatic(PluginConfigManager.class);
         mockPluginConfigManager.when(() -> PluginConfigManager.getPluginConfig(RouterConfig.class))
-                .thenReturn(config);
+            .thenReturn(config);
         flowRouteHandler = new FlowRouteHandler();
     }
 
@@ -106,8 +106,9 @@ public class FlowRouteHandlerTest {
         queryMap.put("version", "0.0.1");
         queryMap.put("interface", "com.huaweicloud.foo.FooTest");
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
-        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
+                ".huaweicloud.foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(1, targetInvokers.size());
         Assert.assertEquals(invoker2, targetInvokers.get(0));
         ConfigCache.getLabel(RouterConstant.DUBBO_CACHE_NAME).resetRouteRule(Collections.emptyMap());
@@ -133,8 +134,9 @@ public class FlowRouteHandlerTest {
         queryMap.put("version", "0.0.1");
         queryMap.put("interface", "com.huaweicloud.foo.FooTest");
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
-        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
+                ".huaweicloud.foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(1, targetInvokers.size());
         Assert.assertEquals(invoker2, targetInvokers.get(0));
         ConfigCache.getLabel(RouterConstant.DUBBO_CACHE_NAME).resetGlobalRule(Collections.emptyList());
@@ -160,8 +162,9 @@ public class FlowRouteHandlerTest {
         queryMap.put("version", "0.0.1");
         queryMap.put("interface", "com.huaweicloud.foo.FooTest");
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
-        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
+                ".huaweicloud.foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(1, targetInvokers.size());
         Assert.assertEquals(invoker2, targetInvokers.get(0));
         ConfigCache.getLabel(RouterConstant.DUBBO_CACHE_NAME).resetRouteRule(Collections.emptyMap());
@@ -177,10 +180,10 @@ public class FlowRouteHandlerTest {
         config.setUseRequestRouter(true);
         List<Object> invokers = new ArrayList<>();
         ApacheInvoker<Object> invoker1 = new ApacheInvoker<>("1.0.0",
-                Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "bar", "bar1"));
+            Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "bar", "bar1"));
         invokers.add(invoker1);
         ApacheInvoker<Object> invoker2 = new ApacheInvoker<>("1.0.1",
-                Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "foo", "bar2"));
+            Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "foo", "bar2"));
         invokers.add(invoker2);
         ApacheInvoker<Object> invoker3 = new ApacheInvoker<>("1.0.1");
         invokers.add(invoker3);
@@ -195,16 +198,18 @@ public class FlowRouteHandlerTest {
         // 匹配foo: bar2实例
         invocation.setAttachment("foo", "bar2");
         invocation.setAttachment("foo1", "bar2");
-        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
+                ".huaweicloud.foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(1, targetInvokers.size());
         Assert.assertEquals(invoker2, targetInvokers.get(0));
 
         // 匹配1.0.0版本实例
         invocation.getObjectAttachments().clear();
         invocation.setAttachment("version", "1.0.0");
-        targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud" +
+                ".foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(1, targetInvokers.size());
         Assert.assertEquals(invoker1, targetInvokers.get(0));
     }
@@ -218,10 +223,10 @@ public class FlowRouteHandlerTest {
         config.setRequestTags(Arrays.asList("foo", "bar", "version"));
         List<Object> invokers = new ArrayList<>();
         ApacheInvoker<Object> invoker1 = new ApacheInvoker<>("1.0.0",
-                Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "foo", "bar1"));
+            Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "foo", "bar1"));
         invokers.add(invoker1);
         ApacheInvoker<Object> invoker2 = new ApacheInvoker<>("1.0.1",
-                Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "bar", "bar2"));
+            Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "bar", "bar2"));
         invokers.add(invoker2);
         ApacheInvoker<Object> invoker3 = new ApacheInvoker<>("1.0.1");
         invokers.add(invoker3);
@@ -235,43 +240,48 @@ public class FlowRouteHandlerTest {
 
         // 不匹配bar: bar1实例时，匹配没有bar标签的实例
         invocation.setAttachment("bar", "bar1");
-        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
+                ".huaweicloud.foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(2, targetInvokers.size());
         Assert.assertFalse(targetInvokers.contains(invoker2));
 
         // 不匹配bar: bar1实例时，优先匹配没有bar标签的实例，如果没有无bar标签的实例，则返回空列表
         List<Object> sameInvokers = new ArrayList<>();
         ApacheInvoker<Object> sameInvoker1 = new ApacheInvoker<>("1.0.0",
-                Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "bar", "bar3"));
+            Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "bar", "bar3"));
         sameInvokers.add(sameInvoker1);
         ApacheInvoker<Object> sameInvoker2 = new ApacheInvoker<>("1.0.1",
-                Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "bar", "bar2"));
+            Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "bar", "bar2"));
         sameInvokers.add(sameInvoker2);
         invocation.getObjectAttachments().clear();
         invocation.setAttachment("bar", "bar1");
-        targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , sameInvokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud" +
+                ".foo.FooTest")
+            , sameInvokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(0, targetInvokers.size());
 
         // 不匹配version: 1.0.3实例时，返回所有版本的实例
         invocation.getObjectAttachments().clear();
         invocation.setAttachment("version", "1.0.3");
-        targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud" +
+                ".foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(3, targetInvokers.size());
 
         // 不传入attachment时，匹配无标签实例
         invocation.getObjectAttachments().clear();
-        targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud" +
+                ".foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(1, targetInvokers.size());
         Assert.assertEquals(invoker3, targetInvokers.get(0));
 
         // 不传入attachment时，优先匹配无标签实例，没有无标签实例时，返回全部实例
         invocation.getObjectAttachments().clear();
-        targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , sameInvokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud" +
+                ".foo.FooTest")
+            , sameInvokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(sameInvokers, targetInvokers);
     }
 
@@ -295,8 +305,9 @@ public class FlowRouteHandlerTest {
         queryMap.put("version", "0.0.1");
         queryMap.put("interface", "com.huaweicloud.foo.FooTest");
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
-        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
+                ".huaweicloud.foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(1, targetInvokers.size());
         Assert.assertEquals(invoker1, targetInvokers.get(0));
         ConfigCache.getLabel(RouterConstant.DUBBO_CACHE_NAME).resetRouteRule(Collections.emptyMap());
@@ -308,10 +319,10 @@ public class FlowRouteHandlerTest {
         config.setUseRequestRouter(true);
         List<Object> invokers = new ArrayList<>();
         ApacheInvoker<Object> invoker1 = new ApacheInvoker<>("1.0.0",
-                Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "bar", "bar1"));
+            Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "bar", "bar1"));
         invokers.add(invoker1);
         ApacheInvoker<Object> invoker2 = new ApacheInvoker<>("1.0.1",
-                Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "foo", "bar2"));
+            Collections.singletonMap(RouterConstant.PARAMETERS_KEY_PREFIX + "foo", "bar2"));
         invokers.add(invoker2);
         ApacheInvoker<Object> invoker3 = new ApacheInvoker<>("1.0.1");
         invokers.add(invoker3);
@@ -324,8 +335,9 @@ public class FlowRouteHandlerTest {
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
 
         // 测试无tags时
-        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        List<Object> targetInvokers = (List<Object>) flowRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
+                ".huaweicloud.foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(invokers, targetInvokers);
     }
 }

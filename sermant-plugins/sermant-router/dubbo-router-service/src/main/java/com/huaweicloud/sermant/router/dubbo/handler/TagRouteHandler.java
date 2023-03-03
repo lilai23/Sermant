@@ -16,8 +16,6 @@
 
 package com.huaweicloud.sermant.router.dubbo.handler;
 
-import com.huaweicloud.sermant.core.plugin.config.PluginConfigManager;
-import com.huaweicloud.sermant.router.common.config.RouterConfig;
 import com.huaweicloud.sermant.router.common.constants.RouterConstant;
 import com.huaweicloud.sermant.router.common.utils.CollectionUtils;
 import com.huaweicloud.sermant.router.config.cache.ConfigCache;
@@ -28,7 +26,6 @@ import com.huaweicloud.sermant.router.config.entity.Route;
 import com.huaweicloud.sermant.router.config.entity.RouterConfiguration;
 import com.huaweicloud.sermant.router.config.entity.Rule;
 import com.huaweicloud.sermant.router.config.entity.ValueMatch;
-import com.huaweicloud.sermant.router.config.utils.RuleUtils;
 import com.huaweicloud.sermant.router.config.utils.TagRuleUtils;
 import com.huaweicloud.sermant.router.dubbo.cache.DubboCache;
 import com.huaweicloud.sermant.router.dubbo.strategy.RuleStrategyHandler;
@@ -52,7 +49,8 @@ public class TagRouteHandler extends AbstractRouteHandler {
     }
 
     @Override
-    public Object handle(String targetService, List<Object> invokers, Object invocation, Map<String, String> queryMap, String serviceInterface) {
+    public Object handle(String targetService, List<Object> invokers, Object invocation, Map<String, String> queryMap,
+                         String serviceInterface) {
         if (!shouldHandle(invokers)) {
             return invokers;
         }
@@ -116,7 +114,7 @@ public class TagRouteHandler extends AbstractRouteHandler {
                 if (parameters == null) {
                     return Collections.emptyList();
                 }
-                String tagValue = parameters.get(key);
+                String tagValue = parameters.get(RouterConstant.PARAMETERS_KEY_PREFIX + key);
                 if (!isFullMatch && matchStrategy.isMatch(values, tagValue, matchRule.isCaseInsensitive())) {
                     // 如果不是全匹配，且匹配了一个，那么直接return
                     return rule.getRoute();

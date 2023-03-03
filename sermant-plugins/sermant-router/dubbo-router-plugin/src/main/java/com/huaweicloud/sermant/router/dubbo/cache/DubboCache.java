@@ -35,7 +35,7 @@ public enum DubboCache {
     private String appName;
 
     // parameters中增加版本号、路由标签
-    private  Map<String, String> parameters;
+    private Map<String, String> parameters;
 
     private final Map<String, String> applicationCache;
 

@@ -63,7 +63,7 @@ public class TagRouteHandlerTest {
         config.setRequestTags(Arrays.asList("foo", "bar", "version"));
         mockPluginConfigManager = Mockito.mockStatic(PluginConfigManager.class);
         mockPluginConfigManager.when(() -> PluginConfigManager.getPluginConfig(RouterConfig.class))
-                .thenReturn(config);
+            .thenReturn(config);
         tagRouteHandler = new TagRouteHandler();
     }
 
@@ -98,8 +98,9 @@ public class TagRouteHandlerTest {
         parameters.put("group", "red");
         DubboCache.INSTANCE.setParameters(parameters);
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
-        List<Object> targetInvokers = (List<Object>) tagRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        List<Object> targetInvokers = (List<Object>) tagRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
+                ".huaweicloud.foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(1, targetInvokers.size());
         Assert.assertEquals(invoker2, targetInvokers.get(0));
         ConfigCache.getLabel(RouterConstant.DUBBO_CACHE_NAME).resetRouteRule(Collections.emptyMap());
@@ -128,8 +129,9 @@ public class TagRouteHandlerTest {
         parameters.put("group", "red");
         DubboCache.INSTANCE.setParameters(parameters);
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
-        List<Object> targetInvokers = (List<Object>) tagRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        List<Object> targetInvokers = (List<Object>) tagRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
+                ".huaweicloud.foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(1, targetInvokers.size());
         Assert.assertEquals(invoker2, targetInvokers.get(0));
         ConfigCache.getLabel(RouterConstant.DUBBO_CACHE_NAME).resetGlobalRule(Collections.emptyList());
@@ -158,8 +160,9 @@ public class TagRouteHandlerTest {
         parameters.put("group", "red");
         DubboCache.INSTANCE.setParameters(parameters);
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
-        List<Object> targetInvokers = (List<Object>) tagRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        List<Object> targetInvokers = (List<Object>) tagRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
+                ".huaweicloud.foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(1, targetInvokers.size());
         Assert.assertEquals(invoker2, targetInvokers.get(0));
         ConfigCache.getLabel(RouterConstant.DUBBO_CACHE_NAME).resetRouteRule(Collections.emptyMap());
@@ -193,8 +196,9 @@ public class TagRouteHandlerTest {
         parameters.put("group", "red");
         DubboCache.INSTANCE.setParameters(parameters);
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
-        List<Object> targetInvokers = (List<Object>) tagRouteHandler.handle(DubboCache.INSTANCE.getApplication("com.huaweicloud.foo.FooTest")
-                , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
+        List<Object> targetInvokers = (List<Object>) tagRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
+                ".huaweicloud.foo.FooTest")
+            , invokers, invocation, queryMap, "com.huaweicloud.foo.FooTest");
         Assert.assertEquals(1, targetInvokers.size());
         Assert.assertEquals(invoker1, targetInvokers.get(0));
         ConfigCache.getLabel(RouterConstant.DUBBO_CACHE_NAME).resetRouteRule(Collections.emptyMap());

@@ -62,7 +62,8 @@ public enum HandlerChainEntry {
      * @see com.alibaba.dubbo.rpc.Invoker
      * @see org.apache.dubbo.rpc.Invocation
      */
-    public Object process(String targetService, List<Object> invokers, Object invocation, Map<String, String> queryMap, String serviceInterface) {
+    public Object process(String targetService, List<Object> invokers, Object invocation,
+                          Map<String, String> queryMap, String serviceInterface) {
         return HANDLER_CHAIN.handle(targetService, invokers, invocation, queryMap, serviceInterface);
     }
 }
