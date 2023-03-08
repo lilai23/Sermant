@@ -190,7 +190,7 @@ runs:
       uses: actions/upload-artifact@v3
       if: ${{ failure() || cancelled() }}
       with:
-        name: (${{ github.job }})-graceful-(${{ matrix.springBootVersion }}-${{ matrix.springCloudVersion }})-logs
+        name: (${{ github.job }})-request-router-(${{ matrix.springBootVersion }}-${{ matrix.springCloudVersion }})-logs
         path: |
           ./*.log
           ./logs/**

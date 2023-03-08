@@ -209,7 +209,7 @@ public class AbstractDirectoryServiceTest {
         queryMap.put("version", "0.0.1");
         queryMap.put("interface", "com.huaweicloud.foo.FooTest");
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("group", "red");
+        parameters.put(RouterConstant.PARAMETERS_KEY_PREFIX + "group", "red");
         DubboCache.INSTANCE.setParameters(parameters);
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
         List<Object> targetInvokers = (List<Object>) service.selectInvokers(testObject, arguments, invokers);
@@ -245,8 +245,6 @@ public class AbstractDirectoryServiceTest {
         queryMap.put("group", "fooGroup");
         queryMap.put("version", "0.0.1");
         queryMap.put("interface", "com.huaweicloud.foo.FooTest");
-        Map<String, String> parameters = new HashMap<>();
-        parameters1.put("group", "red");
         DubboCache.INSTANCE.setParameters(parameters1);
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
         List<Object> targetInvokers = (List<Object>) service.selectInvokers(testObject, arguments, invokers);

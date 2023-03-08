@@ -95,7 +95,7 @@ public class TagRouteHandlerTest {
         queryMap.put("version", "0.0.1");
         queryMap.put("interface", "com.huaweicloud.foo.FooTest");
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("group", "red");
+        parameters.put(RouterConstant.PARAMETERS_KEY_PREFIX + "group", "red");
         DubboCache.INSTANCE.setParameters(parameters);
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
         List<Object> targetInvokers = (List<Object>) tagRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
@@ -126,7 +126,7 @@ public class TagRouteHandlerTest {
         queryMap.put("version", "0.0.1");
         queryMap.put("interface", "com.huaweicloud.foo.FooTest");
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("group", "red");
+        parameters.put(RouterConstant.PARAMETERS_KEY_PREFIX + "group", "red");
         DubboCache.INSTANCE.setParameters(parameters);
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
         List<Object> targetInvokers = (List<Object>) tagRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
@@ -157,7 +157,7 @@ public class TagRouteHandlerTest {
         queryMap.put("version", "0.0.1");
         queryMap.put("interface", "com.huaweicloud.foo.FooTest");
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("group", "red");
+        parameters.put(RouterConstant.PARAMETERS_KEY_PREFIX + "group", "red");
         DubboCache.INSTANCE.setParameters(parameters);
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
         List<Object> targetInvokers = (List<Object>) tagRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +
@@ -193,7 +193,7 @@ public class TagRouteHandlerTest {
         queryMap.put("version", "0.0.1");
         queryMap.put("interface", "com.huaweicloud.foo.FooTest");
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("group", "red");
+        parameters.put(RouterConstant.PARAMETERS_KEY_PREFIX + "group", "red");
         DubboCache.INSTANCE.setParameters(parameters);
         DubboCache.INSTANCE.putApplication("com.huaweicloud.foo.FooTest", "foo");
         List<Object> targetInvokers = (List<Object>) tagRouteHandler.handle(DubboCache.INSTANCE.getApplication("com" +

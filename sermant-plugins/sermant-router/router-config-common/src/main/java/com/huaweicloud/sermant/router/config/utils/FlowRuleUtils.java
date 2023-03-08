@@ -37,6 +37,10 @@ import java.util.regex.Pattern;
  * @since 2023-02-21
  */
 public class FlowRuleUtils {
+
+    private FlowRuleUtils() {
+    }
+
     /**
      * 获取目标规则
      *

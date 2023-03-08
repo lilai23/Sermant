@@ -74,6 +74,9 @@ public class RuleUtils {
 
     private static final RouterConfig ROUTER_CONFIG = PluginConfigManager.getConfig(RouterConfig.class);
 
+    private RuleUtils() {
+    }
+
     /**
      * 获取所有标签
      *

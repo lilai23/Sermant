@@ -35,6 +35,10 @@ import java.util.Optional;
  * @since 2023-02-21
  */
 public class TagRuleUtils {
+
+    private TagRuleUtils() {
+    }
+
     /**
      * 获取目标规则
      *
