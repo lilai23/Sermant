@@ -16,6 +16,7 @@
 
 package com.huaweicloud.integration.controller;
 
+import com.huaweicloud.integration.constants.Constant;
 import com.huaweicloud.integration.entity.LaneTestEntity;
 import com.huaweicloud.integration.entity.TestEntity;
 import com.huaweicloud.integration.service.LaneService;
@@ -60,7 +61,7 @@ public class LaneController {
     @GetMapping("/getLaneByDubbo")
     public Map<String, Object> getLaneByDubbo(TestEntity entity) {
         RpcContext.getContext().setAttachments(getLaneFlag());
-        RpcContext.getContext().setAttachment("x-user-id", String.valueOf(entity.getId()));
+        RpcContext.getContext().setAttachment(Constant.LANE_TEST_USER_ID, String.valueOf(entity.getId()));
         return laneService.getLaneByDubbo(entity.getName(), new LaneTestEntity(entity.getLaneId(), entity.isEnabled()),
             new String[]{entity.getArrName()}, Collections.singletonList(entity.getListId()),
             Collections.singletonMap("name", entity.getMapName()));
@@ -79,7 +80,7 @@ public class LaneController {
         @RequestParam(value = "id", defaultValue = "0") int id,
         @RequestParam(value = "enabled", defaultValue = "false") boolean enabled) {
         RpcContext.getContext().setAttachments(getLaneFlag());
-        RpcContext.getContext().setAttachment("x-user-id", String.valueOf(id));
+        RpcContext.getContext().setAttachment(Constant.LANE_TEST_USER_ID, String.valueOf(id));
         return laneService.getLaneByFeign(name, new LaneTestEntity(id, enabled));
     }
 
@@ -96,7 +97,7 @@ public class LaneController {
         @RequestParam(value = "id", defaultValue = "0") int id,
         @RequestParam(value = "enabled", defaultValue = "false") boolean enabled) {
         RpcContext.getContext().setAttachments(getLaneFlag());
-        RpcContext.getContext().setAttachment("x-user-id", String.valueOf(id));
+        RpcContext.getContext().setAttachment(Constant.LANE_TEST_USER_ID, String.valueOf(id));
         return laneService.getLaneByRest(name, new LaneTestEntity(id, enabled));
     }
 

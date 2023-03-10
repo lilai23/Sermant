@@ -33,6 +33,11 @@ public class Constant {
      */
     public static final String TAG_KEY = "dubbo.tag";
 
+    /**
+     * dubbo路由标签key
+     */
+    public static final String LANE_TEST_USER_ID = "x-user-id";
+
     private Constant() {
     }
 }
