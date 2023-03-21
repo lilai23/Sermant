@@ -27,6 +27,7 @@ import java.util.Map;
 public interface ServiceInstance {
     /**
      * 唯一标识符 ip:port
+     * test
      *
      * @return id
      */
