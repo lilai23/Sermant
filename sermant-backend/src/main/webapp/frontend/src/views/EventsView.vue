@@ -518,7 +518,10 @@ const eventName = reactive({
   SAME_TAG_RULE_MATCH: "同标签优先规则匹配成功",
   SAME_TAG_RULE_MISMATCH: "同标签优先规则匹配失败",
   INSTANCE_REMOVAL: "实例摘除",
-  INSTANCE_RECOVERY: "实例恢复"
+  INSTANCE_RECOVERY: "实例恢复",
+  SPRING_BOOT_REGISTRY: "SpringBoot服务注册事件",
+  SPRING_BOOT_UNREGISTRY: "SpringBoot服务移除注册事件",
+  SPRING_BOOT_GRAY_CONFIG_TAKE_EFFECT: "SpringBoot注册插件灰度规则生效事件"
 });
 
 const displayState = reactive({
