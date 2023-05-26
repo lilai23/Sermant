@@ -304,7 +304,6 @@
                 <module>sermant-plugins</module>
                 <module>sermant-common</module>
                 <module>sermant-backend</module>
-                <module>sermant-backend-lite</module>
                 <module>sermant-injector</module>
                 <module>report</module>
             </modules>
@@ -369,7 +368,6 @@
                 <module>sermant-plugins</module>
                 <module>sermant-common</module>
                 <module>sermant-backend</module>
-                <module>sermant-backend-lite</module>
                 <module>sermant-package</module>
                 <module>sermant-integration-tests</module>
                 <module>sermant-injector</module>
