@@ -21,6 +21,7 @@ import com.huawei.monitor.service.MetricReportService;
 
 import com.huaweicloud.sermant.core.common.LoggerFactory;
 import com.huaweicloud.sermant.core.config.ConfigManager;
+import com.huaweicloud.sermant.core.plugin.config.PluginConfigManager;
 import com.huaweicloud.sermant.core.service.ServiceManager;
 import com.huaweicloud.sermant.core.service.monitor.RegistryService;
 import com.huaweicloud.sermant.core.utils.AesUtil;
@@ -57,7 +58,7 @@ public class PrometheusMetricServiceImpl implements MetricReportService {
 
     @Override
     public void startMonitorServer() {
-        MonitorServiceConfig monitorServiceConfig = ConfigManager.getConfig(MonitorServiceConfig.class);
+        MonitorServiceConfig monitorServiceConfig = PluginConfigManager.getPluginConfig(MonitorServiceConfig.class);
         if (StringUtils.isBlank(monitorServiceConfig.getAddress()) || monitorServiceConfig.getPort() == 0) {
             LOGGER.info("monitor config missing address or port");
             return;
