@@ -136,6 +136,7 @@ public class NacosConfigTest {
 
     private boolean checkAgentConfig() {
         final String result = restTemplate.getForObject(serverUrl + "/dynamic/config/value", String.class);
+        LOGGER.warn("=======Result 内容: [{}]==================", result);
         if ("1k".equals(result)) {
             final String property = restTemplate.getForObject(serverUrl + "/dynamic/config/property", String.class);
             return "ak,bk".equals(property);
