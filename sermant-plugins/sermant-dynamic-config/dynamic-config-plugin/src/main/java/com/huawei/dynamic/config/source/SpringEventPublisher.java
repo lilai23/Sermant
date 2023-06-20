@@ -56,6 +56,8 @@ public class SpringEventPublisher implements ApplicationEventPublisherAware {
         if (event.getEventType() == DynamicConfigEventType.INIT) {
             return;
         }
+        System.out.println("### context classloader" + Thread.currentThread().getContextClassLoader());
+        System.out.println("### classloader" + getClass().getClassLoader());
         applicationEventPublisher.publishEvent(new RefreshEvent(this, null, "sermant refresh"));
     }
 }

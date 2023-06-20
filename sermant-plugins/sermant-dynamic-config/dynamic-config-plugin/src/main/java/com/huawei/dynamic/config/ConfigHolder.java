@@ -84,6 +84,7 @@ public enum ConfigHolder {
                 isNeedRefresh |= doAccept(configSource, event);
             }
             if (isNeedRefresh) {
+                System.out.println("### event:" + event.toString());
                 notifier.refresh(event);
             }
         });

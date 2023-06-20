@@ -19,6 +19,7 @@ package com.huaweicloud.sermant.core.plugin.subscribe.processor;
 
 import com.huaweicloud.sermant.core.service.dynamicconfig.common.DynamicConfigEvent;
 import com.huaweicloud.sermant.core.service.dynamicconfig.common.DynamicConfigListener;
+import com.huaweicloud.sermant.core.service.tracing.common.SpanEvent;
 
 /**
  * 监听器适配, 多个监听器集成到一个processor处理
@@ -31,15 +32,18 @@ public class IntegratedEventListenerAdapter implements DynamicConfigListener {
 
     private final String rawGroup;
 
+    private final ClassLoader classLoader;
+
     /**
      * 构造器
      *
      * @param processor 配置处理器
-     * @param rawGroup  组标签
+     * @param rawGroup 组标签
      */
     public IntegratedEventListenerAdapter(ConfigProcessor processor, String rawGroup) {
         this.processor = processor;
         this.rawGroup = rawGroup;
+        this.classLoader = Thread.currentThread().getContextClassLoader();
     }
 
     @Override
@@ -47,6 +51,17 @@ public class IntegratedEventListenerAdapter implements DynamicConfigListener {
         if (processor == null) {
             return;
         }
-        processor.process(rawGroup, event);
+
+        // 订阅时的类加载器与配置监听时的类加载器有可能不是同一个，所以需要还原
+        ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            System.out.println("###thread" + Thread.currentThread().getName());
+            System.out.println("###currentClassLoader" + currentClassLoader);
+            System.out.println("###classloader" + classLoader);
+            Thread.currentThread().setContextClassLoader(classLoader);
+            processor.process(rawGroup, event);
+        } finally {
+            Thread.currentThread().setContextClassLoader(currentClassLoader);
+        }
     }
 }
