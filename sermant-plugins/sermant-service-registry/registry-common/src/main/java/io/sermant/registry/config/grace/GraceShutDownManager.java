@@ -159,16 +159,18 @@ public class GraceShutDownManager {
      * @param endpoints Address，host:port
      */
     public void addShutdownEndpoints(Collection<String> endpoints) {
+        LOGGER.info("process ShutdownEndpoint:" + endpoints);
         if (endpoints == null || endpoints.isEmpty()) {
             return;
         }
+        LOGGER.info("add ShutdownEndpoint:" + endpoints);
         endpoints.forEach(this::addShutdownEndpoint);
     }
 
     private void addShutdownEndpoint(String endpoint) {
         if (markShutDownEndpoints.size() < MAX_SHUTDOWN_ENDPOINT_CACHE) {
             markShutDownEndpoints.put(endpoint, System.currentTimeMillis());
-            LOGGER.fine(String.format(Locale.ENGLISH, "Marked endpoint [%s] will be shutdown!", endpoint));
+            LOGGER.info(String.format(Locale.ENGLISH, "Marked endpoint [%s] will be shutdown!", endpoint));
         } else {
             cleanUp();
             LOGGER.warning(String.format(Locale.ENGLISH,

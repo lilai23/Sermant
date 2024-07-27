@@ -22,6 +22,7 @@
 
 package io.sermant.registry.grace.interceptors;
 
+import io.sermant.core.common.LoggerFactory;
 import io.sermant.core.plugin.agent.entity.ExecuteContext;
 import io.sermant.core.utils.ReflectUtils;
 import io.sermant.core.utils.StringUtils;
@@ -33,6 +34,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -47,6 +49,7 @@ public class SpringLoadbalancerWarmUpInterceptor extends GraceSwitchInterceptor 
 
     private static final String RESPONSE_CLASS =
             "org.springframework.cloud.client.loadbalancer.DefaultResponse";
+    private static final Logger LOGGER = LoggerFactory.getLogger();
 
     @Override
     protected ExecuteContext doBefore(ExecuteContext context) {
@@ -95,12 +98,17 @@ public class SpringLoadbalancerWarmUpInterceptor extends GraceSwitchInterceptor 
      * @return Filtered services
      */
     private List<ServiceInstance> filterOfflineInstance(List<ServiceInstance> serviceInstances) {
+        LOGGER.info("process filter" + graceConfig.isEnableGraceShutdown());
         if (graceConfig.isEnableGraceShutdown()) {
             final GraceShutDownManager graceShutDownManager = GraceContext.INSTANCE.getGraceShutDownManager();
-            return serviceInstances.stream()
-                    .filter(serviceInstance -> !graceShutDownManager.isMarkedOffline(
-                            buildEndpoint(serviceInstance.getHost(), serviceInstance.getPort())))
+            List<ServiceInstance> collect = serviceInstances.stream()
+                    .filter(serviceInstance -> {
+                        LOGGER.info("before" + serviceInstance.getPort());
+                        return !graceShutDownManager.isMarkedOffline(
+                                buildEndpoint(serviceInstance.getHost(), serviceInstance.getPort()));
+                    })
                     .collect(Collectors.toList());
+            collect.forEach(serviceInstance -> LOGGER.info("after" +serviceInstance.getPort()));
         }
         return serviceInstances;
     }

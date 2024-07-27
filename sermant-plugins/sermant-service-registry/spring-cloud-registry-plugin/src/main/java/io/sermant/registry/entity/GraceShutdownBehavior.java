@@ -56,6 +56,7 @@ public class GraceShutdownBehavior implements Runnable {
     }
 
     private void graceShutDown() {
+        LOGGER.info("#hook:" + GraceContext.INSTANCE.getGraceShutDownManager().getRequestCount());
         long shutdownWaitTime = graceConfig.getShutdownWaitTime() * ConfigConstants.SEC_DELTA;
         final long shutdownCheckTimeUnit = graceConfig.getShutdownCheckTimeUnit() * ConfigConstants.SEC_DELTA;
         while (GraceContext.INSTANCE.getGraceShutDownManager().getRequestCount() > 0 && shutdownWaitTime > 0) {

@@ -98,6 +98,7 @@ public abstract class GracefulTest {
     /**
      * 测试优雅下线
      */
+    @Test
     public void testGracefulDown() {
         if (!isTargetTest("down")) {
             return;
