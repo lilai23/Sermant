@@ -40,9 +40,10 @@ public enum AddressCache {
 
     AddressCache() {
         GraceConfig pluginConfig = PluginConfigManager.getPluginConfig(GraceConfig.class);
+        System.out.println(pluginConfig.getUpstreamAddressExpiredTime());
         cache = CacheBuilder.newBuilder()
                 .maximumSize(pluginConfig.getUpstreamAddressMaxSize()) // 设置缓存的最大容量
-                .expireAfterWrite(pluginConfig.getUpstreamAddressExpiredTime(), TimeUnit.SECONDS) // 设置缓存失效时间
+                .expireAfterWrite(200, TimeUnit.SECONDS) // 设置缓存失效时间
                 .build();
     }
 
