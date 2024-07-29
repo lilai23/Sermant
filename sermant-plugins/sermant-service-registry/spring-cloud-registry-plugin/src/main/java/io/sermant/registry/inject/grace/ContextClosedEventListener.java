@@ -19,13 +19,17 @@ package io.sermant.registry.inject.grace;
 import io.sermant.core.common.LoggerFactory;
 import io.sermant.core.plugin.config.PluginConfigManager;
 import io.sermant.core.plugin.service.PluginServiceManager;
+import io.sermant.registry.config.ConfigConstants;
 import io.sermant.registry.config.GraceConfig;
+import io.sermant.registry.config.grace.GraceContext;
 import io.sermant.registry.services.GraceService;
+import io.sermant.registry.utils.CommonUtils;
 
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
@@ -40,12 +44,15 @@ public class ContextClosedEventListener {
 
     private GraceService graceService;
 
+    private GraceConfig graceConfig;
+
     /**
      * Constructor
      */
     public ContextClosedEventListener() {
         try {
             graceService = PluginServiceManager.getPluginService(GraceService.class);
+            graceConfig = PluginConfigManager.getPluginConfig(GraceConfig.class);
         } catch (IllegalArgumentException exception) {
             LOGGER.severe("graceService is not enabled");
             graceService = null;
@@ -57,10 +64,31 @@ public class ContextClosedEventListener {
      */
     @EventListener(value = ContextClosedEvent.class)
     public void listener() {
+        System.out.println("###");
+        LOGGER.info("###");
         if (!isEnableGraceDown() || graceService == null) {
             return;
         }
         graceService.shutdown();
+
+        CommonUtils.sleep(1000);
+        if (graceConfig.isEnableSpring() && graceConfig.isEnableGraceShutdown()) {
+            GraceContext.INSTANCE.getGraceShutDownManager().setShutDown(true);
+            long shutdownWaitTime = graceConfig.getShutdownWaitTime() * ConfigConstants.SEC_DELTA;
+            final long shutdownCheckTimeUnit = graceConfig.getShutdownCheckTimeUnit() * ConfigConstants.SEC_DELTA;
+            while (GraceContext.INSTANCE.getGraceShutDownManager().getRequestCount() > 0 && shutdownWaitTime > 0) {
+                LOGGER.info(String.format(Locale.ENGLISH, "Wait all request complete , remained count [%s]",
+                        GraceContext.INSTANCE.getGraceShutDownManager().getRequestCount()));
+                CommonUtils.sleep(shutdownCheckTimeUnit);
+                shutdownWaitTime -= shutdownCheckTimeUnit;
+            }
+            final int requestCount = GraceContext.INSTANCE.getGraceShutDownManager().getRequestCount();
+            if (requestCount > 0) {
+                LOGGER.warning(String.format(Locale.ENGLISH, "Request num that does not completed is [%s] ", requestCount));
+            } else {
+                LOGGER.fine("Graceful shutdown completed!");
+            }
+        }
     }
 
     private boolean isEnableGraceDown() {

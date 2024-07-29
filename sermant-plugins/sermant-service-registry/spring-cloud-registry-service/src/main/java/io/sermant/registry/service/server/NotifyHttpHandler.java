@@ -49,9 +49,11 @@ public class NotifyHttpHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        LOGGER.info("NotifyHttpHandler start process");
         try {
             if (GraceConstants.GRACE_HTTP_METHOD_POST.equalsIgnoreCase(exchange.getRequestMethod())) {
                 String serviceName = exchange.getRequestHeaders().getFirst(GraceConstants.MARK_SHUTDOWN_SERVICE_NAME);
+                LOGGER.info("NotifyHttpHandler serviceName:" + serviceName);
                 addMarkShutdownEndpoint(exchange.getRequestHeaders());
                 if (StringUtils.isBlank(serviceName)) {
                     LOGGER.warning("ServiceName is empty.");

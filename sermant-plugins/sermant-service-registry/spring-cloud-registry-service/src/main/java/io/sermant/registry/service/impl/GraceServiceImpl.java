@@ -27,13 +27,16 @@ import io.sermant.registry.config.grace.GraceContext;
 import io.sermant.registry.context.RegisterContext;
 import io.sermant.registry.context.RegisterContext.ClientInfo;
 import io.sermant.registry.service.cache.AddressCache;
+import io.sermant.registry.service.utils.HttpClientResult;
 import io.sermant.registry.service.utils.HttpClientUtils;
 import io.sermant.registry.services.GraceService;
 import io.sermant.registry.services.RegisterCenterService;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -83,8 +86,23 @@ public class GraceServiceImpl implements GraceService {
     }
 
     private void execute(String address, Map<String, Collection<String>> header) {
-        HttpClientUtils.INSTANCE.doPost(GRACE_HTTP_SERVER_PROTOCOL + address + GraceConstants.GRACE_NOTIFY_URL_PATH,
-                REQUEST_BODY, header);
+        Date now = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String currentTime = dateFormat.format(now);
+        System.out.println("###notify start Time: " + currentTime);
+        for (int i = 0; i < 2; i++) {
+            HttpClientResult result = HttpClientUtils.INSTANCE.doPost(
+                    GRACE_HTTP_SERVER_PROTOCOL + address + GraceConstants.GRACE_NOTIFY_URL_PATH,
+                    REQUEST_BODY, header);
+            System.out.println(result.getCode());
+            System.out.println(result.getMsg());
+            if (result.getCode() == GraceConstants.GRACE_HTTP_SUCCESS_CODE) {
+                break;
+            }
+        }
+        now = new Date();
+        currentTime = dateFormat.format(now);
+        System.out.println("###notify stop Time: " + currentTime);
     }
 
     /**

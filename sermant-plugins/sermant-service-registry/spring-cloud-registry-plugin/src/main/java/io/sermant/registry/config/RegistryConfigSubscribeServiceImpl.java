@@ -66,9 +66,9 @@ public class RegistryConfigSubscribeServiceImpl implements PluginService {
         // and this configuration has the highest priority
         final GraceConfig graceConfig = PluginConfigManager.getPluginConfig(GraceConfig.class);
         graceConfig.fixGraceSwitch();
-        if (graceConfig.isEnableSpring() && graceConfig.isEnableGraceShutdown()) {
-            Runtime.getRuntime().addShutdownHook(new GraceShutdownHook());
-        }
+//        if (graceConfig.isEnableSpring() && graceConfig.isEnableGraceShutdown()) {
+//            Runtime.getRuntime().addShutdownHook(new GraceShutdownHook());
+//        }
     }
 
     /**

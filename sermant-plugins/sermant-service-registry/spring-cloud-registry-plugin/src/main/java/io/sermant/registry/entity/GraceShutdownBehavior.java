@@ -29,6 +29,8 @@ import io.sermant.registry.config.GraceConfig;
 import io.sermant.registry.config.grace.GraceContext;
 import io.sermant.registry.utils.CommonUtils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 import java.util.logging.Logger;
 
@@ -56,6 +58,11 @@ public class GraceShutdownBehavior implements Runnable {
     }
 
     private void graceShutDown() {
+        Date now = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String currentTime = dateFormat.format(now);
+        System.out.println("###graceShutDown start Time: " + currentTime);
+        CommonUtils.sleep(15000);
         long shutdownWaitTime = graceConfig.getShutdownWaitTime() * ConfigConstants.SEC_DELTA;
         final long shutdownCheckTimeUnit = graceConfig.getShutdownCheckTimeUnit() * ConfigConstants.SEC_DELTA;
         while (GraceContext.INSTANCE.getGraceShutDownManager().getRequestCount() > 0 && shutdownWaitTime > 0) {
@@ -70,5 +77,8 @@ public class GraceShutdownBehavior implements Runnable {
         } else {
             LOGGER.fine("Graceful shutdown completed!");
         }
+        now = new Date();
+        currentTime = dateFormat.format(now);
+        System.out.println("###graceShutDown stop Time: " + currentTime);
     }
 }

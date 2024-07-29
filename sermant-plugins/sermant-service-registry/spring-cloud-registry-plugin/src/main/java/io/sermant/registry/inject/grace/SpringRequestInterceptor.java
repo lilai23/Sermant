@@ -100,9 +100,11 @@ public class SpringRequestInterceptor implements HandlerInterceptor {
                 && GraceConstants.GRACE_OFFLINE_SOURCE_VALUE
                 .equals(request.getHeader(GraceConstants.GRACE_OFFLINE_SOURCE_KEY))) {
             String address = request.getHeader(GraceConstants.SERMANT_GRACE_ADDRESS);
+            System.out.println("###addGraceAddress:" + address);
             if (StringUtils.isBlank(address)) {
                 address = request.getRemoteAddr() + ":" + request.getServerPort();
             }
+            System.out.println("###addGraceAddress:" + address);
             graceService.addAddress(address);
         }
     }

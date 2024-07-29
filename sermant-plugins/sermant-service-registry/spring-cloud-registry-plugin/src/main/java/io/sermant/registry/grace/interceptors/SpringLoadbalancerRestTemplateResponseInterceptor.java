@@ -40,6 +40,7 @@ import org.springframework.http.client.ClientHttpResponse;
 public class SpringLoadbalancerRestTemplateResponseInterceptor extends GraceSwitchInterceptor {
     @Override
     protected ExecuteContext doBefore(ExecuteContext context) {
+        System.out.println("###SpringLoadbalancerRestTemplateResponseInterceptor");
         HttpRequest request = (HttpRequest) context.getArguments()[0];
         HttpHeaders headers = request.getHeaders();
         headers.putAll(getGraceIpHeaders());

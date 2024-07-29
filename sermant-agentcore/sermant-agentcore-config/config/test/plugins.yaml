@@ -6,7 +6,6 @@
 # 4. Bytecode enhancements at the same intercept point for different plugins take effect in the same order as the plugins load.
 # 'plugins' is used to configure static plugins. The plugins take effect when Sermant starts by premain. Plugins that support static installation are configured and cannot be uninstalled
 plugins:
-  - flowcontrol
   - service-router
   - service-registry
   - loadbalancer
@@ -27,14 +26,3 @@ dynamicPlugins:
   passive:
 #    - passive-plugin
 # 'profile' is used to configure the list plugins by scenario
-profiles:
-  cse:
-    - flowcontrol
-    - service-router
-    - service-registry
-    - dynamic-config
-  apm:
-    - flowcontrol
-    - service-router
-# 'profile' is used to configure scenarios that take effect
-profile: cse,apm

@@ -199,6 +199,7 @@ public class GraceSwitchInterceptor extends RegisterSwitchSupport {
         headers.put(GraceConstants.SERMANT_GRACE_ADDRESS, Collections.singletonList(address));
         headers.put(GraceConstants.GRACE_OFFLINE_SOURCE_KEY,
                 Collections.singletonList(GraceConstants.GRACE_OFFLINE_SOURCE_VALUE));
+        System.out.println("###getGraceIpHeaders" + headers.get(GraceConstants.GRACE_OFFLINE_SOURCE_KEY));
         return headers;
     }
 }

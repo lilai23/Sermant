@@ -19,11 +19,14 @@ package io.sermant.registry.service.cache;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
+import io.sermant.core.common.LoggerFactory;
 import io.sermant.core.plugin.config.PluginConfigManager;
 import io.sermant.registry.config.GraceConfig;
 
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * Upstream address caching
@@ -40,6 +43,7 @@ public enum AddressCache {
 
     AddressCache() {
         GraceConfig pluginConfig = PluginConfigManager.getPluginConfig(GraceConfig.class);
+        System.out.println("###time:" + pluginConfig.getUpstreamAddressExpiredTime());
         cache = CacheBuilder.newBuilder()
                 .maximumSize(pluginConfig.getUpstreamAddressMaxSize()) // 设置缓存的最大容量
                 .expireAfterWrite(pluginConfig.getUpstreamAddressExpiredTime(), TimeUnit.SECONDS) // 设置缓存失效时间
@@ -53,6 +57,7 @@ public enum AddressCache {
      */
     public void addAddress(String address) {
         cache.put(address, "");
+        System.out.println("###update:" +cache.asMap().keySet());
     }
 
     /**
@@ -61,6 +66,7 @@ public enum AddressCache {
      * @return Set Address Set
      */
     public Set<String> getAddressSet() {
+        System.out.println("AddressSet:" + cache.asMap().keySet());
         return cache.asMap().keySet();
     }
 

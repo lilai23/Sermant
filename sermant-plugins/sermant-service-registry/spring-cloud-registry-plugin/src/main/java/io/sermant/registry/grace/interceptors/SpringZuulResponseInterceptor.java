@@ -45,6 +45,7 @@ import javax.servlet.http.HttpServletResponse;
 public class SpringZuulResponseInterceptor extends GraceSwitchInterceptor {
     @Override
     protected ExecuteContext doBefore(ExecuteContext context) {
+        System.out.println("###SpringZuulResponseInterceptor");
         RequestContext requestContext = RequestContext.getCurrentContext();
         Map<String, List<String>> map = getGraceIpHeaders();
         map.forEach((key, value) -> requestContext.addZuulRequestHeader(key, value.get(0)));

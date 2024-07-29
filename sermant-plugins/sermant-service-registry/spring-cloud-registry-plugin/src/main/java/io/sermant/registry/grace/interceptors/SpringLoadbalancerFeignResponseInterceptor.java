@@ -43,6 +43,7 @@ import java.util.Optional;
 public class SpringLoadbalancerFeignResponseInterceptor extends GraceSwitchInterceptor {
     @Override
     protected ExecuteContext doBefore(ExecuteContext context) {
+        System.out.println("###SpringLoadbalancerFeignResponseInterceptor");
         Object[] arguments = context.getArguments();
         Request request = (Request) arguments[0];
         HashMap<String, Collection<String>> headers = new HashMap<>(request.headers());

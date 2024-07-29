@@ -37,6 +37,7 @@ runs:
         grace.rule.enableGraceShutdown: true
         grace.rule.enableOfflineNotify: true
         grace.rule.warmUpTime: 600
+        grace.rule.upstreamAddressExpiredTime: 600
         servicecomb.service.enableSpringRegister: true
         servicecomb.service.preferIpAddress: true
       # graceful-rest-provider service port 8443 do not change, it special for springCloud Edgware.SR2 test ssl feature.
@@ -82,7 +83,7 @@ runs:
         processor-keyword: feign|rest
     - name: if failure then upload error log
       uses: actions/upload-artifact@v3
-      if: ${{ failure() || cancelled() }}
+      if: ${{ failure() || success() }}
       with:
         name: (${{ github.job }})-graceful-(${{ matrix.springBootVersion }}-${{ matrix.springCloudVersion }})-logs
         path: |

@@ -24,18 +24,21 @@ package io.sermant.registry.grace.interceptors;
 
 import com.netflix.loadbalancer.Server;
 
+import io.sermant.core.common.LoggerFactory;
 import io.sermant.core.plugin.agent.entity.ExecuteContext;
 import io.sermant.core.utils.StringUtils;
 import io.sermant.registry.config.grace.GraceContext;
 import io.sermant.registry.config.grace.GraceHelper;
 import io.sermant.registry.config.grace.GraceShutDownManager;
 
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.zookeeper.discovery.ZookeeperServer;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -46,7 +49,7 @@ import java.util.stream.Collectors;
  */
 public class SpringRibbonWarmUpInterceptor extends GraceSwitchInterceptor {
     private static final String ZOOKEEPER_SERVER_NAME = "org.springframework.cloud.zookeeper.discovery.ZookeeperServer";
-
+    private static final Logger LOGGER = LoggerFactory.getLogger();
     @Override
     protected ExecuteContext doAfter(ExecuteContext context) {
         final Object result = context.getResult();
@@ -89,11 +92,18 @@ public class SpringRibbonWarmUpInterceptor extends GraceSwitchInterceptor {
      * @return Filtered services
      */
     private List<Server> filterOfflineInstance(List<Server> serverList) {
+        LOGGER.info("process filter" + graceConfig.isEnableGraceShutdown());
         if (graceConfig.isEnableGraceShutdown()) {
             final GraceShutDownManager graceShutDownManager = GraceContext.INSTANCE.getGraceShutDownManager();
-            return serverList.stream().filter(server -> !graceShutDownManager.isMarkedOffline(
-                    buildEndpoint(server.getHost(), server.getPort())))
+            List<Server> collect = serverList.stream()
+                    .filter(server -> {
+                        LOGGER.info("before" + server.getPort());
+                        return !graceShutDownManager.isMarkedOffline(
+                                buildEndpoint(server.getHost(), server.getPort()));
+                    })
                     .collect(Collectors.toList());
+            collect.forEach(server -> LOGGER.info("after" +server.getPort()));
+            return collect;
         }
         return serverList;
     }
