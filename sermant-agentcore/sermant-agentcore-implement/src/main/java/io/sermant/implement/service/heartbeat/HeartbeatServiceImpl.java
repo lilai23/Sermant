@@ -111,7 +111,7 @@ public class HeartbeatServiceImpl implements HeartbeatService {
             addExtInfo(entry.getKey(), heartbeatMessage.getPluginInfoMap().get(entry.getKey()));
         }
         heartbeatMessage.updateHeartbeatVersion();
-        if (nettyClient == null) {
+        if (nettyClient == null)     {
             LOGGER.warning("Netty client is null when send heartbeat message.");
             return;
         }

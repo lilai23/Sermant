@@ -133,6 +133,10 @@ public class ServiceConfig implements BaseConfig {
         if (ServiceManager.XDS_CORE_SERVICE_IMPL.equals(serviceName)) {
             return isXdsServiceEnable();
         }
+
+        if ("io.sermant.implement.service.otel.OtelServiceImpl".equals(serviceName)) {
+            return true;
+        }
         return false;
     }
 }

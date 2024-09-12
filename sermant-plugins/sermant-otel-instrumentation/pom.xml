@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>sermant-plugins</artifactId>
+        <groupId>io.sermant</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>sermant-otel-instrumentation</artifactId>
+
+    <packaging>pom</packaging>
+    <modules>
+        <module>httpclient4.x-plugin</module>
+    </modules>
+
+    <properties>
+        <sermant.basedir>${pom.basedir}/../../..</sermant.basedir>
+        <package.plugin.name>otel-instrumentation</package.plugin.name>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>agent</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>httpclient4.x-plugin</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>test</id>
+            <modules>
+                <module>httpclient4.x-plugin</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>release</id>
+            <modules>
+                <module>httpclient4.x-plugin</module>
+            </modules>
+        </profile>
+    </profiles>
+
+</project>
